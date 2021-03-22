@@ -1,0 +1,95 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String       @id @default(uuid())
+  email              String       @unique
+  password           String       @default("eagloo")
+  banned             Boolean      @default(false)
+  createdAt          DateTime     @default(now())
+  verificationSecret String?
+  authenticated      Boolean      @default(false)
+  mainthreads        Mainthread[]
+  schedules          Schedule[]
+  subthreads         Subthread[]
+}
+
+model Schedule {
+  id         String   @id @default(uuid())
+  userId     String
+  content    String
+  createdAt  DateTime @default(now())
+  done       Boolean  @default(false)
+  importance Int      @default(1)
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model Class {
+  id   String @id @default(uuid())
+  name String
+  code String
+}
+
+model Mainthread {
+  id         String      @id @default(uuid())
+  userId     String
+  content    String
+  createdAt  DateTime    @default(now())
+  college    College
+  subject    String
+  user       User        @relation(fields: [userId], references: [id])
+  subthreads Subthread[]
+}
+
+model Subthread {
+  id           String     @id @default(uuid())
+  userId       String
+  content      String
+  createdAt    DateTime   @default(now())
+  mainthreadId String
+  mainthread   Mainthread @relation(fields: [mainthreadId], references: [id])
+  user         User       @relation(fields: [userId], references: [id])
+}
+
+model Feedback {
+  id        String   @id @default(uuid())
+  user      String
+  content   String
+  createdAt DateTime @default(now())
+  category  String   @default("overview")
+}
+
+model Notice {
+  id        String   @id @default(uuid())
+  content   String
+  createdAt DateTime @default(now())
+}
+
+enum College {
+  General
+  Liberal_Arts
+  Commerce_and_Economics
+  Business
+  Science
+  Engineering
+  Life_Science_and_Biotechnology
+  Theology
+  Social_Sciences
+  Law
+  Music
+  Human_Ecology
+  Educational_Science
+  University_College
+  Underwood_International_College
+  Global_Leadership_Division
+  Medicine
+  Dentistry
+  Nursing
+  Pharmacy
+}
