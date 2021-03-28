@@ -5,10 +5,11 @@ import { RoomController } from "src/controller/room.controller";
 import { SocketIoGateway } from "src/gateway/socket.io.gateway";
 import { AppService } from "src/service/app.service";
 import { FeedbackModule } from "./feedback.module";
+import { ScheduleModule } from "./schedule.module";
 import { UserModule } from "./user.module";
 
 @Module({
-  imports: [UserModule, FeedbackModule],
+  imports: [UserModule, FeedbackModule, ScheduleModule],
   controllers: [AppController, RoomController],
   providers: [AppService, SocketIoAdapter, SocketIoGateway], // 필요한 서비스를 주입시킴 ()
 })
