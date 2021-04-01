@@ -1,4 +1,4 @@
-const { adjs, nouns } = require("./words");
+import { adjs, nouns } from "../words";
 
 export function secretGenerator(): string {
   const ranAdj = adjs[Math.floor(Math.random() * adjs.length)];
