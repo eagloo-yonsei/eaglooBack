@@ -124,7 +124,7 @@ export class ScheduleController {
   }
 
   @Delete(":scheduleId")
-  async deleteSchedule(@Param("scheduleId") scheduleId: number) {
+  async deleteSchedule(@Param("scheduleId") scheduleId: string) {
     const response = { success: false, message: "" };
 
     try {

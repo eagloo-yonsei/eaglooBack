@@ -71,7 +71,7 @@ export class ThreadController {
   }
 
   @Get(":college/total")
-  async getThreadCountsByCollege(@Param("college") college: string) {
+  async getThreadCountsByCollege(@Param("college") college: any) {
     try {
       const totalThreads = await this.prismaServcie.mainthread.count({
         where: {
@@ -90,7 +90,7 @@ export class ThreadController {
 
   @Get(":college/page/:pageNo")
   async getThreadsByCollege(
-    @Param("college") college: string,
+    @Param("college") college: any,
     @Param("pageNo", ParseIntPipe) pageNo: number
   ) {
     try {
