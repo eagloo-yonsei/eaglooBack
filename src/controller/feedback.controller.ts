@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from "@nestjs/common";
+import { Body, Controller, NotFoundException, Post } from "@nestjs/common";
 import { PrismaService } from "src/service/prisma.service";
 
 @Controller("api/feedback")
@@ -23,7 +23,7 @@ export class FeedbackController {
       };
     } catch (err) {
       console.log(err);
-      throw new Error("서버 오류입니다. 잠시 후 다시 시도해 주세요");
+      throw new NotFoundException("서버 오류입니다. 잠시 후 다시 시도해 주세요");
     }
   }
 }
