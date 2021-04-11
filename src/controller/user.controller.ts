@@ -6,7 +6,7 @@ import { UserService } from "src/service/user.service";
 import { sendMail } from "../utils/sendMail";
 import { secretGenerator } from "../utils/secretGenerator";
 
-@Controller("user")
+@Controller("api/user")
 export class UserController {
   constructor(
     private readonly userService: UserService,
