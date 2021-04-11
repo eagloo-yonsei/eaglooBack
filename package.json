@@ -1,26 +1,29 @@
 {
-  "scripts": {
-    "start": "rm -rf build && nest start --watch"
-  },
-  "dependencies": {
-    "@nestjs/common": "^7.6.13",
-    "@nestjs/core": "^7.6.13",
-    "@nestjs/platform-express": "^7.6.13",
-    "@nestjs/platform-socket.io": "^7.6.13",
-    "@nestjs/websockets": "^7.6.13",
-    "@prisma/client": "^2.19.0",
-    "googleapis": "^68.0.0",
-    "nodemailer": "^6.5.0",
-    "prisma": "^2.19.0",
-    "reflect-metadata": "^0.1.13",
-    "rxjs": "^6.6.6",
-    "socket.io": "^3.1.2"
-  },
-  "devDependencies": {
-    "@nestjs/cli": "^7.5.6",
-    "@prisma/cli": "^2.19.0",
-    "@types/socket.io": "^2.1.13",
-    "dotenv": "^8.2.0",
-    "vercel": "^21.3.3"
-  }
+    "scripts": {
+        "start": "rm -rf build && nest start --watch"
+    },
+    "prisma": {
+        "schema": "src/prisma/schema.prisma"
+    },
+    "dependencies": {
+        "@nestjs/common": "^7.6.13",
+        "@nestjs/core": "^7.6.13",
+        "@nestjs/platform-express": "^7.6.13",
+        "@nestjs/platform-socket.io": "^7.6.13",
+        "@nestjs/websockets": "^7.6.13",
+        "@prisma/client": "^2.19.0",
+        "googleapis": "^68.0.0",
+        "nodemailer": "^6.5.0",
+        "prisma": "^2.19.0",
+        "reflect-metadata": "^0.1.13",
+        "rxjs": "^6.6.6",
+        "socket.io": "^3.1.2"
+    },
+    "devDependencies": {
+        "@nestjs/cli": "^7.5.6",
+        "@prisma/cli": "^2.19.0",
+        "@types/socket.io": "^2.1.13",
+        "dotenv": "^8.2.0",
+        "vercel": "^21.3.3"
+    }
 }
