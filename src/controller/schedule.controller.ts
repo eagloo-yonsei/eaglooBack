@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Param,
   Post,
   Put,
@@ -39,7 +40,8 @@ export class ScheduleController {
         success: true,
       };
     } catch (err) {
-      throw new Error(err);
+      console.log('err: ', err);
+      throw new NotFoundException(err);
     }
   }
 
@@ -75,7 +77,7 @@ export class ScheduleController {
     } catch (err) {
       console.log(err);
       response.message = "서버 오류입니다. 잠시 후 다시 시도해 주세요";
-      throw new Error(response.message);
+      throw new NotFoundException(response.message);
     }
   }
 
@@ -119,7 +121,7 @@ export class ScheduleController {
     } catch (err) {
       console.log(err);
       response.message = "서버 오류입니다. 잠시 후 다시 시도해 주세요";
-      throw new Error(response.message);
+      throw new NotFoundException(response.message);
     }
   }
 
@@ -139,7 +141,7 @@ export class ScheduleController {
       };
     } catch (err) {
       console.log(err);
-      throw new Error("서버 오류입니다. 잠시 후 다시 시도해 주세요");
+      throw new NotFoundException("서버 오류입니다. 잠시 후 다시 시도해 주세요");
     }
   }
 }

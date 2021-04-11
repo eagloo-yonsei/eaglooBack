@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  NotFoundException,
   Param,
   ParseIntPipe,
   Post,
@@ -26,7 +27,7 @@ export class ThreadController {
     } catch (err) {
       console.log(err);
       response.message = "서버 오류입니다. 잠시 후 다시 시도해 주세요";
-      throw new Error(response.message);
+      throw new NotFoundException(response.message);
     }
   }
 
@@ -66,7 +67,7 @@ export class ThreadController {
       };
     } catch (err) {
       console.log(err);
-      throw new Error("서버 오류입니다. 잠시 후 다시 시도해 주세요");
+      throw new NotFoundException("서버 오류입니다. 잠시 후 다시 시도해 주세요");
     }
   }
 
@@ -84,7 +85,7 @@ export class ThreadController {
       };
     } catch (err) {
       console.log(err);
-      throw new Error("서버 오류입니다. 잠시 후 다시 시도해 주세요");
+      throw new NotFoundException("서버 오류입니다. 잠시 후 다시 시도해 주세요");
     }
   }
 
@@ -129,7 +130,7 @@ export class ThreadController {
       };
     } catch (err) {
       console.log(err);
-      throw new Error("서버 오류입니다. 잠시 후 다시 시도해 주세요");
+      throw new NotFoundException("서버 오류입니다. 잠시 후 다시 시도해 주세요");
     }
   }
 
@@ -159,7 +160,7 @@ export class ThreadController {
       };
     } catch (err) {
       console.log(err);
-      throw new Error("서버 오류입니다. 잠시 후 다시 시도해 주세요");
+      throw new NotFoundException("서버 오류입니다. 잠시 후 다시 시도해 주세요");
     }
   }
 
@@ -192,7 +193,7 @@ export class ThreadController {
       };
     } catch (err) {
       console.log(err);
-      throw new Error("서버 오류입니다. 잠시 후 다시 시도해 주세요");
+      throw new NotFoundException("서버 오류입니다. 잠시 후 다시 시도해 주세요");
     }
   }
 }
