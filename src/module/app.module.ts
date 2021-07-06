@@ -10,8 +10,8 @@ import { ThreadModule } from "./thread.module";
 import { UserModule } from "./user.module";
 
 @Module({
-  imports: [UserModule, FeedbackModule, ScheduleModule, ThreadModule],
-  controllers: [AppController, RoomController],
-  providers: [AppService, SocketIoAdapter, SocketIoGateway], // 필요한 서비스를 주입시킴 ()
+    imports: [UserModule, FeedbackModule, ScheduleModule, ThreadModule],
+    controllers: [AppController, RoomController],
+    providers: [AppService, SocketIoAdapter, SocketIoGateway], // 필요한 서비스를 주입시킴 ()
 })
 export class AppModule {}
