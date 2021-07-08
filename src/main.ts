@@ -9,13 +9,13 @@ async function bootstrap() {
         credentials: true,
     });
     app.setGlobalPrefix("/api");
-    // 소켓 어댑터 등록.
+    // 소켓 어댑터 등록
     app.useWebSocketAdapter(new SocketIoAdapter(app, true));
     app.enableCors({
         credentials: true,
     });
 
-    await app.listen(3001);
+    await app.listen(5000);
 }
 
 bootstrap();

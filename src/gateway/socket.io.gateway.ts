@@ -28,7 +28,6 @@ export class SocketIoGateway
     @WebSocketServer()
     private wss: Server;
     private logger: Logger = new Logger("AppGateway");
-    private rooms: any[] = [];
 
     public users = {};
     public socketToRoom = {};
@@ -38,40 +37,46 @@ export class SocketIoGateway
     afterInit(server: Server) {
         this.logger.log("Initialized!");
     }
+
+    // 소켓이 연결되었을 때 자동으로 실행
     handleConnection(client: Socket, ...args: any[]) {
-        this.logger.log("Client connected: ", client.id);
+        this.logger.log("new Socket connected: ", client.id);
         console.log("Client connected: ", args);
     }
 
+    // 소켓 연결이 해제되었을 때 자동으로 실행
     handleDisconnect(socket: Socket) {
-        console.log("handleDisconnect: ", socket.id);
+        // 해제된 클라이언트 정보를 서버측 방 정보에서 제거
         const roomDetail = this.roomService.deleteRoomDetailBySocketId(
             socket.id
         );
         this.wss.emit("DISCONNECT", roomDetail?.no);
+        console.log("handleDisconnect: ", socket.id);
     }
 
     /** 방참가 */
+    // 1. 새로운 참여자로부터 JOIN 신호 수신
     @SubscribeMessage(Channel.JOIN)
     join(socket: Socket, payload: { roomNo: number; positionNo: number }) {
+        // 소켓 및 서버의 RoomService에 새로운 참여자의 정보를 추가
+        socket.join("room" + payload.roomNo);
         const room = this.roomService.updateRoom(payload.roomNo, {
             no: payload.positionNo,
             socketId: socket.id,
             userName: "power",
         });
+        // 같은 방의 기존 참여자 정보 추출
         const beforeRoom =
             room?.details?.filter((v) => v.socketId !== socket.id) || [];
-        console.log("room: ", beforeRoom);
-        console.log("beforeRoom: ", beforeRoom);
-        // socket.emit(Channel.GET_CURRENT_ROOM, beforeRoom);
-        // temp
-        socket.join("room" + payload.roomNo);
+
+        // 새로운 참여자에게 기존 참여자들의 정보 전달
         socket.emit(Channel.GET_CURRENT_ROOM, beforeRoom);
-        // socket.to('room' + payload.roomNo).emit(Channel.GET_CURRENT_ROOM, beforeRoom);
     }
 
+    // 새로운 참여자가 자신의 기존의 참여자 각각에게 보내는 signal.
+    // (front 단의 createPeer() 부분에서 emit 됨)
     @SubscribeMessage(Channel.SENDING_SIGNAL)
-    sendingSignal2(socket: Socket, payload) {
+    sendingSignal(socket: Socket, payload) {
         this.wss.to(payload.userToSignal).emit(Channel.NEW_USER, {
             signal: payload.signal,
             callerId: payload.callerId,
@@ -79,182 +84,13 @@ export class SocketIoGateway
         });
     }
 
+    // 기존 참여자가 새로운 참여자에게 자신의 스트림 정보를 전송
+    // (front 단의 addPeer() 부분에서 emit 됨)
     @SubscribeMessage(Channel.RETURNING_SIGNAL)
-    returningSignal2(socket: Socket, payload) {
+    returningSignal(socket: Socket, payload) {
         this.wss.to(payload.callerId).emit(Channel.RECEIVING_SIGNAL, {
             signal: payload.signal,
             id: socket.id,
         });
     }
-
-    // @SubscribeMessage(Channel.RECEIVING_SIGNAL)
-    // receivingSignal2(socket: Socket, payload) {
-    //   this.wss.to(payload.callerId).emit("receiving returned signal", {
-    //     signal: payload.signal,
-    //     id: socket.id,
-    //   });
-    // }
-
-    // @SubscribeMessage("JOIN_ROOM")
-    // joinRoom(socket: Socket, payload: { roomId: number; positionId: number }) {
-    //   const { roomId, positionId } = payload;
-
-    //   console.log("join room - roomId: ", roomId);
-    //   console.log("join room - positionId: ", positionId);
-    //   if (users[roomId]) {
-    //     const length = users[roomId].length;
-    //     console.log("length: ", length);
-    //     if (length === 4) {
-    //       socket.emit("room full");
-    //       return;
-    //     }
-    //     users[roomId].push({ positionId, socketId: socket.id });
-    //     // users[roomId].push(socket.id);
-    //   } else {
-    //     users[roomId] = [{ positionId, socketId: socket.id }];
-    //   }
-    //   socketToRoom[socket.id] = roomId;
-
-    //   // const usersInThisRooms = users[roomId].filter(
-    //   //   (v) => v.positionId !== positionId
-    //   // );
-    //   // const usersInThisRoom = users[roomId].filter((id) => id !== socket.id);
-    //   // console.log("users[roomId]: ", users[roomId]);
-    //   // console.log("usersInThisRooms: ", usersInThisRooms);
-    //   // socket.emit("ALREADY_USERS", usersInThisRooms);
-    //   // this.wss.emit(Channel.CREATE_USER, user);
-    // }
-
-    // @SubscribeMessage("RECEIVING SIGNAL")
-    // receivingSignal2(socket: Socket, payload) {
-    //   this.wss.to(payload.callerId).emit("receiving returned signal", {
-    //     signal: payload.signal,
-    //     id: socket.id,
-    //   });
-    // }
-
-    // @SubscribeMessage("SENDING_SIGNAL")
-    // sendingSignal(socket: Socket, payload) {
-    //   this.wss.to(payload.userToSignal).emit("USER_JOIN", {
-    //     signal: payload.signal,
-    //     callerId: payload.callerId,
-    //     positionId: payload.positionId,
-    //   });
-    // }
-    // @SubscribeMessage("returning signal")
-    // returningSignal(socket: Socket, payload) {
-    //   this.wss.to(payload.callerId).emit("receiving returned signal", {
-    //     signal: payload.signal,
-    //     id: socket.id,
-    //   });
-    // }
-
-    // @SubscribeMessage("connect-room1")
-    // createUser(client: Socket, data: any) {
-    //   console.log('createUSer:"', data);
-    //   this.wss.emit("connectToNewUser", data);
-    //   // this.wss.emit(Channel.CREATE_USER, user);
-    // }
-
-    // @SubscribeMessage(Channel.CREATE_ROOM)
-    createRoom(room: any) {
-        // this.wss.emit(Channel.CREATE_ROOM, room);
-    }
-
-    // @SubscribeMessage("join-room")
-    // handleMessage(
-    //   client: Socket,
-    //   data: { roomId: string; userId: string; user: User }
-    // ): void {
-    //   const { roomId, userId, user } = data;
-    //   this.logger.log("data ", JSON.stringify(data));
-    //   this.rooms = this.rooms.map((v) => {
-    //     if (v.id === roomId) {
-    //       Object.assign(user, {
-    //         peerId: userId,
-    //       });
-    //       return {
-    //         ...v,
-    //         count: v.count + 1,
-    //         users: [...v.users, user],
-    //       };
-    //     } else {
-    //       return v;
-    //     }
-    //   });
-    //   client.join(roomId);
-    //   client.to(roomId).broadcast.emit("user-connected", userId);
-    //   client.to(roomId).broadcast.emit("video-stream");
-    //   this.wss.emit("get-rooms", {
-    //     rooms: this.rooms,
-    //     users: this.users,
-    //   });
-    //   client.on("disconnect", (data) => {
-    //     console.log("Close: ", data);
-    //     this.rooms = this.rooms.map((v) => {
-    //       if (v.id === roomId) {
-    //         const users = v.users.filter((v2) => v2.peerId !== userId);
-    //         return { ...v, count: v.count - 1, users };
-    //       } else {
-    //         return v;
-    //       }
-    //     });
-    //     this.wss.emit("get-rooms", {
-    //       users: this.users,
-    //       rooms: this.rooms,
-    //     });
-    //     client.to(roomId).broadcast.emit("user-disconnected", userId);
-    //   });
-    //   client.on("close", (data) => {
-    //     console.log("disconnect: ", data);
-    //     this.rooms = this.rooms.map((v) => {
-    //       if (v.id === roomId) {
-    //         const users = v.users.filter((v2) => v2.peerId !== userId);
-    //         return { ...v, count: v.count - 1, users };
-    //       } else {
-    //         return v;
-    //       }
-    //     });
-    //     this.wss.emit("get-rooms", {
-    //       users: this.users,
-    //       rooms: this.rooms,
-    //     });
-    //     client.to(roomId).broadcast.emit("user-disconnected", userId);
-    //   });
-    //   // this.wss.emit("user-connected", data.userId);
-    //   // client.join(data.roomId);
-    //   // client.to(data.roomId).broadcast.emit('user-connected', data.userId);
-    //   // client.emit("user-connected", data.userId);
-    //   // this.wss.emit("msgToClient: ", text);
-    // }
-
-    // @SubscribeMessage("get-rooms")
-    // getRooms(client: Socket, data: User) {
-    //   console.log("get-rooms1: ", client.id);
-    //   console.log("get-rooms: ", data);
-    //   this.updateToUserActive({
-    //     ...data,
-    //     socketId: client.id,
-    //   });
-    //   this.wss.emit("get-rooms", {
-    //     users: this.users,
-    //     rooms: this.rooms,
-    //   });
-    // }
-
-    // @SubscribeMessage("create-room")
-    // createRoom(client: Socket, data: any) {
-    //   console.log("Create room : ", data);
-    //   this.rooms.push(data);
-    //   this.appService.addRoom(data);
-    //   this.wss.emit("get-rooms", {
-    //     users: this.users,
-    //     rooms: this.rooms,
-    //   });
-    // }
-
-    // @SubscribeMessage("message")
-    // handleMe(client: Socket, data: string) {
-    //   this.wss.emit("message", data);
-    // }
 }
