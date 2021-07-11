@@ -33,6 +33,9 @@ export class RoomController {
         @Body()
         input: ConnectRoomInput
     ) {
+        if (roomNo <= 0 || roomNo >= 7 || positionNo <= 0 || positionNo >= 13) {
+            throw new NotAcceptableException("올바르지 않은 형식입니다.");
+        }
         const room = this.roomService.findRoomByPositionNo(roomNo, positionNo);
         if (room) {
             throw new NotAcceptableException("이미 존재하는 방입니다.");
