@@ -1,11 +1,11 @@
-export class RoomDetail {
+export class Seat {
     /* 자리별 정보 */
-    no: number;
+    seatNo: number;
     socketId: string;
-    userName: string;
+    userName?: string;
 }
 
 export class Room {
-    no: number;
-    details: RoomDetail[];
+    roomNo: number;
+    seats: Seat[];
 }

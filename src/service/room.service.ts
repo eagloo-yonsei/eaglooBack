@@ -1,32 +1,32 @@
 import { Injectable } from "@nestjs/common";
-import { Room, RoomDetail } from "../model";
+import { Room, Seat } from "../model";
 
 @Injectable()
 export class RoomService {
     private rooms: Room[] = [
         {
-            no: 1,
-            details: [],
+            roomNo: 1,
+            seats: [],
         },
         {
-            no: 2,
-            details: [],
+            roomNo: 2,
+            seats: [],
         },
         {
-            no: 3,
-            details: [],
+            roomNo: 3,
+            seats: [],
         },
         {
-            no: 4,
-            details: [],
+            roomNo: 4,
+            seats: [],
         },
         {
-            no: 5,
-            details: [],
+            roomNo: 5,
+            seats: [],
         },
         {
-            no: 6,
-            details: [],
+            roomNo: 6,
+            seats: [],
         },
     ];
     constructor() {}
@@ -37,7 +37,7 @@ export class RoomService {
 
     findRoom(roomNo: number) {
         return this.rooms.find((v) => {
-            if (v.no === roomNo) {
+            if (v.roomNo === roomNo) {
                 return v;
             }
         });
@@ -45,17 +45,17 @@ export class RoomService {
 
     findRoomByPositionNo(roomNo: number, positionNo: number) {
         return this.rooms.find((v) => {
-            if (v.no === roomNo) {
-                return v.details.find((subV) => subV.no === positionNo);
+            if (v.roomNo === roomNo) {
+                return v.seats.find((subV) => subV.seatNo === positionNo);
             }
         });
     }
 
     deleteRoomDetailBySocketId(socketId: string) {
-        let removedDetail: RoomDetail | undefined;
+        let removedDetail: Seat | undefined;
         this.rooms = this.rooms.map((room) => {
-            room.details =
-                room.details?.filter((detail) => {
+            room.seats =
+                room.seats?.filter((detail) => {
                     if (detail.socketId !== socketId) {
                         return true;
                     } else {
@@ -67,30 +67,31 @@ export class RoomService {
         return removedDetail;
     }
 
-    updateRoom(no: number, roomDetail: RoomDetail) {
-        const currentRoom = this.rooms.find((v) => v.no === no);
-        if (currentRoom) {
-            currentRoom.details = currentRoom.details.map((v) => {
-                if (v.no === roomDetail.no) {
-                    return {
-                        ...v,
-                        socketId: roomDetail.socketId,
-                    };
-                }
-                return v;
-            });
-        }
+    joinRoom(roomNo: number, newSeat: Seat) {
+        const currentRoom = this.rooms.find((room) => room.roomNo === roomNo);
+        // if (currentRoom) {
+        //     currentRoom.seats = currentRoom.seats.map((seat) => {
+        //         if (seat.seatNo === newSeat.seatNo) {
+        //             return {
+        //                 ...seat,
+        //                 socketId: newSeat.socketId,
+        //             };
+        //         }
+        //         return seat;
+        //     });
+        // }
+        currentRoom?.seats.push(newSeat);
         return currentRoom as Room;
     }
 
     // 이하 아직 쓰일 일 없음
-    addRoom(no: number, roomDetail: RoomDetail) {
-        const currentRoom = this.rooms.find((v) => v.no === no);
+    addRoom(no: number, roomDetail: Seat) {
+        const currentRoom = this.rooms.find((v) => v.roomNo === no);
         let room;
         if (currentRoom) {
             this.rooms = this.rooms.map((v) => {
-                if (v.no === no) {
-                    v.details.push(roomDetail);
+                if (v.roomNo === no) {
+                    v.seats.push(roomDetail);
                 }
                 room = v;
                 return v;
@@ -98,8 +99,8 @@ export class RoomService {
         } else {
             room = roomDetail;
             this.rooms[1] = {
-                no,
-                details: [roomDetail],
+                roomNo: no,
+                seats: [roomDetail],
             };
             // this.rooms.push({
             //   no,
@@ -111,8 +112,8 @@ export class RoomService {
 
     removeRoom(no: number, positionNo: number) {
         this.rooms = this.rooms.map((v) => {
-            if (v.no === no) {
-                v.details = v.details.filter((subV) => subV.no === positionNo);
+            if (v.roomNo === no) {
+                v.seats = v.seats.filter((subV) => subV.seatNo === positionNo);
             }
             return v;
         });

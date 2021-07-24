@@ -26,22 +26,22 @@ export class RoomController {
         return this.roomService.findRooms();
     }
 
-    @Post(":roomNo/position/:positionNo")
+    @Post(":roomNo/seat/:seatNo")
     async connectRoom(
         @Param("roomNo", ParseIntPipe) roomNo: number,
-        @Param("positionNo", ParseIntPipe) positionNo: number,
+        @Param("seatNo", ParseIntPipe) seatNo: number,
         @Body()
         input: ConnectRoomInput
     ) {
-        if (roomNo <= 0 || roomNo >= 7 || positionNo <= 0 || positionNo >= 13) {
+        if (roomNo <= 0 || roomNo >= 11 || seatNo <= 0 || seatNo >= 17) {
             throw new NotAcceptableException("올바르지 않은 형식입니다.");
         }
-        const room = this.roomService.findRoomByPositionNo(roomNo, positionNo);
+        const room = this.roomService.findRoomByPositionNo(roomNo, seatNo);
         if (room) {
             throw new NotAcceptableException("이미 존재하는 방입니다.");
         }
         this.roomService.addRoom(roomNo, {
-            no: positionNo,
+            seatNo: seatNo,
             userName: "power",
             socketId: "",
         });
@@ -51,13 +51,13 @@ export class RoomController {
 
         // console.log("this.socketIoGateway.users: ", this.socketIoGateway.users);
         // console.log("roomNo: ", roomNo);
-        // console.log("positionNo: ", positionNo);
+        // console.log("seatNo: ", seatNo);
         // console.log("input: ", input);
 
         return {
             ok: true,
             roomNo: Number(roomNo),
-            positionNo: Number(positionNo),
+            seatNo: Number(seatNo),
             // endpoint: `http://localhost:3000/room/${roomNo}`,
         };
         // this.socketIoGateway.createRoom(room);
