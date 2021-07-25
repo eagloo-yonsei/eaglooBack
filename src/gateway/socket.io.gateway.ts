@@ -29,9 +29,6 @@ export class SocketIoGateway
     private wss: Server;
     private logger: Logger = new Logger("AppGateway");
 
-    public users = {};
-    public socketToRoom = {};
-
     constructor(private readonly roomService: RoomService) {}
 
     afterInit(server: Server) {
@@ -39,19 +36,27 @@ export class SocketIoGateway
     }
 
     // 소켓이 연결되었을 때
-    handleConnection(client: Socket, ...args: any[]) {
-        // this.logger.log("new Socket connected: ", client.id);
-        console.log("Client connected: ", client.id);
+    handleConnection(socket: Socket, ...args: any[]) {
+        // this.logger.log("new Socket connected: ", socket.id);
+        console.log("Client connected: ", socket.id);
+        console.log(socket.rooms);
     }
 
     // 소켓 연결이 해제되었을 때
     handleDisconnect(socket: Socket) {
         // 해제된 클라이언트 정보를 서버측 방 정보에서 제거
-        const roomDetail = this.roomService.deleteRoomDetailBySocketId(
+        const exitedUserInfo = this.roomService.deleteRoomDetailBySocketId(
             socket.id
         );
-        this.wss.emit("DISCONNECT", roomDetail?.seatNo);
-        console.log("handleDisconnect: ", socket.id);
+        const exitedRoom = this.roomService.findRoom(exitedUserInfo.roomNo);
+        exitedRoom?.seats.forEach((seat) => {
+            this.wss
+                .to(seat.socketId)
+                .emit(Channel.DISCONNECT, exitedUserInfo.seatNo);
+        });
+        console.log(
+            `${exitedUserInfo.roomNo}번 방 ${exitedUserInfo.seatNo}자리 유저가 퇴장함`
+        );
     }
 
     /* 1. 방참가 */
@@ -63,8 +68,6 @@ export class SocketIoGateway
         console.log(
             `${socket.id}가 ${payload.roomNo}번 방 ${payload.seatNo}에 입장`
         );
-        // 소켓 room 및 서버의 RoomService에 신규 참여자의 정보를 추가
-        // socket.join("room" + payload.seatNo);
         const room = this.roomService.joinRoom(payload.roomNo, {
             seatNo: payload.seatNo,
             socketId: socket.id,
@@ -75,7 +78,7 @@ export class SocketIoGateway
         const beforeRoomDetail =
             room?.seats.filter((seat) => seat.socketId !== socket.id) || [];
 
-        console.log(`기존 참여자 정보 : ${beforeRoomDetail}`);
+        // console.log(`기존 참여자 정보 : ${beforeRoomDetail}`);
 
         /* 2. 신규 참여자에게 기존 사용자들 정보 발신 */
         socket.emit(Channel.GET_CURRENT_ROOM, beforeRoomDetail);
@@ -102,5 +105,16 @@ export class SocketIoGateway
             signal: payload.signal,
             id: socket.id,
         });
+    }
+
+    @SubscribeMessage("exile")
+    exile(payload: { roomNo: number; seatNo: number }) {
+        const beExiledId = this.roomService.findSeat(
+            payload.roomNo,
+            payload.seatNo
+        );
+        if (beExiledId) {
+            this.wss.to(beExiledId).emit("exile");
+        }
     }
 }
