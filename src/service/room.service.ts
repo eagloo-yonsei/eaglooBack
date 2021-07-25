@@ -31,16 +31,50 @@ export class RoomService {
     ];
     constructor() {}
 
-    findRooms() {
+    getAllRooms() {
         return this.rooms;
     }
 
+    findSeat(roomNo: number, seatNo: number) {
+        const room = this.rooms.find((room) => {
+            room.roomNo === roomNo;
+        });
+        const seat = room?.seats?.find((seat) => {
+            seat.seatNo === seatNo;
+        });
+        if (seat) {
+            return seat.socketId;
+        } else {
+            return undefined;
+        }
+    }
+
     findRoom(roomNo: number) {
-        return this.rooms.find((v) => {
-            if (v.roomNo === roomNo) {
-                return v;
+        return this.rooms.find((room) => {
+            if (room.roomNo === roomNo) {
+                return room;
             }
         });
+    }
+
+    checkVacancy(roomNo: number, seatNo: number) {
+        const room = this.rooms.find((room) => room.roomNo === roomNo);
+        if (!room) {
+            return { success: false, type: 1 };
+        }
+        const seat = room.seats.find((seat) => seat.seatNo === seatNo);
+        if (seat) {
+            return { success: false, type: 2 };
+        }
+        return { success: true };
+    }
+
+    joinRoom(roomNo: number, newSeat: Seat) {
+        const currentRoom = this.rooms.find((room) => room.roomNo === roomNo);
+        currentRoom?.seats.push(newSeat);
+        console.log(`room info after new user :`);
+        console.dir(this.rooms);
+        return currentRoom as Room;
     }
 
     findRoomByPositionNo(roomNo: number, positionNo: number) {
@@ -52,36 +86,23 @@ export class RoomService {
     }
 
     deleteRoomDetailBySocketId(socketId: string) {
-        let removedDetail: Seat | undefined;
+        let exitedRoomNo: number | undefined;
+        let removedSeatNo: number | undefined;
         this.rooms = this.rooms.map((room) => {
             room.seats =
-                room.seats?.filter((detail) => {
-                    if (detail.socketId !== socketId) {
-                        return true;
+                room.seats?.filter((seat) => {
+                    if (seat.socketId !== socketId) {
+                        return seat;
                     } else {
-                        removedDetail = detail;
+                        exitedRoomNo = room.roomNo;
+                        removedSeatNo = seat.seatNo;
                     }
                 }) || [];
             return room;
         });
-        return removedDetail;
-    }
-
-    joinRoom(roomNo: number, newSeat: Seat) {
-        const currentRoom = this.rooms.find((room) => room.roomNo === roomNo);
-        // if (currentRoom) {
-        //     currentRoom.seats = currentRoom.seats.map((seat) => {
-        //         if (seat.seatNo === newSeat.seatNo) {
-        //             return {
-        //                 ...seat,
-        //                 socketId: newSeat.socketId,
-        //             };
-        //         }
-        //         return seat;
-        //     });
-        // }
-        currentRoom?.seats.push(newSeat);
-        return currentRoom as Room;
+        console.log(`room info after user leave :`);
+        console.dir(this.rooms);
+        return { roomNo: exitedRoomNo, seatNo: removedSeatNo };
     }
 
     // 이하 아직 쓰일 일 없음
