@@ -2,8 +2,10 @@ import { NestFactory } from "@nestjs/core";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { SocketIoAdapter } from "./adapter";
 import { AppModule } from "./module/app.module";
+import { setCustomRoom } from "./beforeInit";
 
 async function bootstrap() {
+    await setCustomRoom();
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
     app.enableCors({
         credentials: true,
