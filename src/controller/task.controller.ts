@@ -9,22 +9,20 @@ import {
     NotFoundException,
 } from "@nestjs/common";
 import { PrismaService } from "src/service/prisma.service";
-import { ScheduleService } from "src/service/schedule.service";
+import { TaskService } from "src/service/task.service";
 
-@Controller("schedule")
-export class ScheduleController {
+@Controller("task")
+export class TaskController {
     constructor(
-        private readonly scheduleService: ScheduleService,
+        private readonly taskService: TaskService,
         private readonly prismaService: PrismaService
     ) {}
 
     @Get(":email")
-    async getSchedule(@Param("email") email: string) {
+    async getTask(@Param("email") email: string) {
         try {
-            const userWithSchedules = await this.scheduleService.getSchedule(
-                email
-            );
-            return userWithSchedules;
+            const userWithTasks = await this.taskService.getTask(email);
+            return userWithTasks;
         } catch (err) {
             console.log("err: ", err);
             throw new NotFoundException(err);
@@ -32,14 +30,14 @@ export class ScheduleController {
     }
 
     @Post()
-    async createSchedule(@Body() body) {
+    async createTask(@Body() body) {
         const email = body.email;
         const content = body.content;
         const importance = parseInt(body.importance);
         const response = { success: false, message: "" };
 
         try {
-            const schedule = await this.prismaService.schedule.create({
+            const task = await this.prismaService.task.create({
                 data: {
                     content,
                     importance,
@@ -57,7 +55,7 @@ export class ScheduleController {
                 },
             });
             return {
-                schedule,
+                task,
                 success: true,
             };
         } catch (err) {
@@ -68,8 +66,8 @@ export class ScheduleController {
     }
 
     @Put()
-    async updateSchedule(@Body() body) {
-        const scheduleId = body.scheduleId;
+    async updateTask(@Body() body) {
+        const taskId = body.taskId;
         const content = body.content;
         const done = body.done;
         // const importance = parseInt(req.body.importance);
@@ -79,9 +77,9 @@ export class ScheduleController {
         // 예쁘지 않음
         try {
             if (done) {
-                await this.prismaService.schedule.update({
+                await this.prismaService.task.update({
                     where: {
-                        id: scheduleId,
+                        id: taskId,
                     },
                     data: {
                         content,
@@ -90,9 +88,9 @@ export class ScheduleController {
                     },
                 });
             } else {
-                await this.prismaService.schedule.update({
+                await this.prismaService.task.update({
                     where: {
-                        id: scheduleId,
+                        id: taskId,
                     },
                     data: {
                         content,
@@ -111,14 +109,14 @@ export class ScheduleController {
         }
     }
 
-    @Delete(":scheduleId")
-    async deleteSchedule(@Param("scheduleId") scheduleId: string) {
+    @Delete(":taskId")
+    async deleteTask(@Param("taskId") taskId: string) {
         const response = { success: false, message: "" };
 
         try {
-            await this.prismaService.schedule.delete({
+            await this.prismaService.task.delete({
                 where: {
-                    id: scheduleId,
+                    id: taskId,
                 },
             });
             response.success = true;

@@ -3,15 +3,15 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 @Injectable()
-export class ScheduleService {
-    async getSchedule(email: string) {
+export class TaskService {
+    async getTask(email: string) {
         try {
-            const userWithSchedules = await prisma.user.findUnique({
+            const userWithTasks = await prisma.user.findUnique({
                 where: {
                     email,
                 },
                 include: {
-                    schedules: {
+                    tasks: {
                         orderBy: {
                             createdAt: "asc",
                         },
@@ -25,7 +25,7 @@ export class ScheduleService {
                 },
             });
             return {
-                schedules: userWithSchedules.schedules,
+                tasks: userWithTasks.tasks,
                 success: true,
             };
         } catch (err) {
@@ -34,7 +34,7 @@ export class ScheduleService {
         }
     }
 
-    async createSchedule(email: string, content: string, importance: number) {}
-    async updateSchedule(scheduleId: string, content: string, done: boolean) {}
-    async deleteSchedule(scheduleId: string) {}
+    async createTask(email: string, content: string, importance: number) {}
+    async updateTask(taskId: string, content: string, done: boolean) {}
+    async deleteTask(taskId: string) {}
 }

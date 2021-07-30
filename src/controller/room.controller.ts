@@ -1,12 +1,4 @@
-import {
-    Body,
-    Controller,
-    Get,
-    NotAcceptableException,
-    Param,
-    ParseIntPipe,
-    Post,
-} from "@nestjs/common";
+import { Controller, Get, Param, ParseIntPipe, Post } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { SocketIoGateway } from "../gateway";
 import { RoomService } from "../service";

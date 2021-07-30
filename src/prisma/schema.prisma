@@ -15,12 +15,14 @@ model User {
   createdAt          DateTime     @default(now())
   verificationSecret String?
   authenticated      Boolean      @default(false)
+  owningRooms        CustomRoom[] @relation(name: "ownership")
+  blockedRooms       CustomRoom[] @relation(name: "block")
+  tasks              Task[]
   mainthreads        Mainthread[]
-  schedules          Schedule[]
   subthreads         Subthread[]
 }
 
-model Schedule {
+model Task {
   id         String   @id @default(uuid())
   userId     String
   content    String
@@ -28,6 +30,19 @@ model Schedule {
   done       Boolean  @default(false)
   importance Int      @default(1)
   user       User     @relation(fields: [userId], references: [id])
+}
+
+model CustomRoom {
+  id              String  @id @default(uuid())
+  roomName        String @unique
+  roomDescription String?
+  ownerId         String
+  owner           User    @relation(name: "ownership", fields: [ownerId], references: [id])
+  blockingUsers   User[]  @relation(name: "block", references: [id])
+  openToPublic    Boolean
+  usePassword     Boolean
+  password        String?
+  allowMic       Boolean
 }
 
 model Class {
