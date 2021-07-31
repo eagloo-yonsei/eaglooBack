@@ -24,10 +24,6 @@ export class RoomService {
             roomNo: 5,
             seats: [],
         },
-        {
-            roomNo: 6,
-            seats: [],
-        },
     ];
     constructor() {}
 
@@ -72,15 +68,13 @@ export class RoomService {
     joinRoom(roomNo: number, newSeat: Seat) {
         const currentRoom = this.rooms.find((room) => room.roomNo === roomNo);
         currentRoom?.seats.push(newSeat);
-        console.log(`room info after new user :`);
-        console.dir(this.rooms);
         return currentRoom as Room;
     }
 
-    findRoomByPositionNo(roomNo: number, positionNo: number) {
-        return this.rooms.find((v) => {
-            if (v.roomNo === roomNo) {
-                return v.seats.find((subV) => subV.seatNo === positionNo);
+    findRoomByPositionNo(roomNo: number, seatNo: number) {
+        return this.rooms.find((room) => {
+            if (room.roomNo === roomNo) {
+                return room.seats.find((seat) => seat.seatNo === seatNo);
             }
         });
     }
@@ -100,8 +94,6 @@ export class RoomService {
                 }) || [];
             return room;
         });
-        console.log(`room info after user leave :`);
-        console.dir(this.rooms);
         return { roomNo: exitedRoomNo, seatNo: removedSeatNo };
     }
 

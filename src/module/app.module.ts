@@ -3,7 +3,8 @@ import { SocketIoAdapter } from "src/adapter";
 import { AppController } from "src/controller/app.controller";
 import { RoomController } from "src/controller/room.controller";
 import { CustomRoomController } from "src/controller/customRoom.controller";
-import { SocketIoGateway } from "src/gateway/socket.io.gateway";
+import { PublicRoomSocketIoGateway } from "src/gateway/publicroom.socket.io.gateway";
+import { CustomRoomSocketIoGateway } from "src/gateway/customroom.socket.io.gateway";
 import { RoomService } from "src/service";
 import { CustomRoomService } from "src/service/customRoom.service";
 import { AppService } from "src/service/app.service";
@@ -18,7 +19,8 @@ import { UserModule } from "./user.module";
     providers: [
         AppService,
         SocketIoAdapter,
-        SocketIoGateway,
+        PublicRoomSocketIoGateway,
+        CustomRoomSocketIoGateway,
         RoomService,
         CustomRoomService,
     ], // 필요한 서비스를 주입시킴 ()

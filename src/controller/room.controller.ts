@@ -1,13 +1,13 @@
 import { Controller, Get, Param, ParseIntPipe, Post } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
-import { SocketIoGateway } from "../gateway";
+import { PublicRoomSocketIoGateway } from "../gateway";
 import { RoomService } from "../service";
 
 @ApiTags("방정보")
 @Controller("room")
 export class RoomController {
     constructor(
-        private readonly socketIoGateway: SocketIoGateway,
+        private readonly roomSocketIoGateway: PublicRoomSocketIoGateway,
         private readonly roomService: RoomService
     ) {}
 
