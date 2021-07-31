@@ -1,1 +1,1 @@
-export * from "./socket.io.gateway";
+export * from "./publicroom.socket.io.gateway";

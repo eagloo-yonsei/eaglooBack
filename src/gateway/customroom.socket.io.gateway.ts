@@ -8,7 +8,7 @@ import {
     WebSocketServer,
 } from "@nestjs/websockets";
 import { Server, Socket } from "socket.io";
-import { RoomService } from "../service";
+import { CustomRoomService } from "../service";
 
 enum Channel {
     JOIN = "JOIN",
@@ -21,15 +21,15 @@ enum Channel {
     RETURNING_SIGNAL = "RETURNING_SIGNAL",
 }
 
-@WebSocketGateway()
-export class SocketIoGateway
+@WebSocketGateway({ namespace: "/customroom" })
+export class CustomRoomSocketIoGateway
     implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit
 {
     @WebSocketServer()
     private wss: Server;
-    private logger: Logger = new Logger("AppGateway");
+    private logger: Logger = new Logger("CustomRoomGateway");
 
-    constructor(private readonly roomService: RoomService) {}
+    constructor(private readonly customRoomService: CustomRoomService) {}
 
     afterInit(server: Server) {
         this.logger.log("Initialized!");
@@ -38,24 +38,27 @@ export class SocketIoGateway
     // 소켓이 연결되었을 때
     handleConnection(socket: Socket, ...args: any[]) {
         // this.logger.log("new Socket connected: ", socket.id);
-        console.log("Client connected: ", socket.id);
-        console.log(socket.rooms);
+        console.log(
+            "Client connected to Custom Room Socket Server: ",
+            socket.id
+        );
     }
 
     // 소켓 연결이 해제되었을 때
     handleDisconnect(socket: Socket) {
         // 해제된 클라이언트 정보를 서버측 방 정보에서 제거
-        const exitedUserInfo = this.roomService.deleteRoomDetailBySocketId(
-            socket.id
+        const exitedUserInfo =
+            this.customRoomService.deleteRoomDetailBySocketId(socket.id);
+        const exitedRoom = this.customRoomService.findRoom(
+            exitedUserInfo.roomId
         );
-        const exitedRoom = this.roomService.findRoom(exitedUserInfo.roomNo);
         exitedRoom?.seats.forEach((seat) => {
             this.wss
                 .to(seat.socketId)
                 .emit(Channel.DISCONNECT, exitedUserInfo.seatNo);
         });
         console.log(
-            `${exitedUserInfo.roomNo}번 방 ${exitedUserInfo.seatNo}자리 유저가 퇴장함`
+            `${exitedUserInfo.roomId}방 ${exitedUserInfo.seatNo}자리 유저가 퇴장함`
         );
     }
 
@@ -63,12 +66,12 @@ export class SocketIoGateway
     @SubscribeMessage(Channel.JOIN)
     join(
         socket: Socket,
-        payload: { roomNo: number; seatNo: number; userName?: string }
+        payload: { roomId: string; seatNo: number; userName?: string }
     ) {
         console.log(
-            `${socket.id}가 ${payload.roomNo}번 방 ${payload.seatNo}에 입장`
+            `${socket.id}가 ${payload.roomId}방 ${payload.seatNo}에 입장`
         );
-        const room = this.roomService.joinRoom(payload.roomNo, {
+        const room = this.customRoomService.joinRoom(payload.roomId, {
             seatNo: payload.seatNo,
             socketId: socket.id,
             userName: payload.userName,
@@ -92,7 +95,7 @@ export class SocketIoGateway
         this.wss.to(payload.userToSignal).emit(Channel.NEW_USER, {
             signal: payload.signal,
             callerId: payload.callerId,
-            seatNo: payload.seatNo,
+            callerSeatNo: payload.callerSeatNo,
         });
     }
 
@@ -108,9 +111,9 @@ export class SocketIoGateway
     }
 
     @SubscribeMessage("exile")
-    exile(payload: { roomNo: number; seatNo: number }) {
-        const beExiledId = this.roomService.findSeat(
-            payload.roomNo,
+    exile(payload: { roomId: string; seatNo: number }) {
+        const beExiledId = this.customRoomService.findSeat(
+            payload.roomId,
             payload.seatNo
         );
         if (beExiledId) {

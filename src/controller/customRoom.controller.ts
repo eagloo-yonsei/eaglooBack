@@ -1,4 +1,11 @@
-import { Controller, Get, Post, Param, Body } from "@nestjs/common";
+import {
+    Controller,
+    Get,
+    Post,
+    Param,
+    Body,
+    ParseIntPipe,
+} from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { CustomRoomService } from "src/service/customRoom.service";
 
@@ -15,6 +22,14 @@ export class CustomRoomController {
     @Get(":roomId")
     async getRoom(@Param("roomId") roomId: string) {
         return this.customRoomService.findRoom(roomId);
+    }
+
+    @Post(":roomId/seat/:seatNo")
+    async checkVacancy(
+        @Param("roomId") roomId: string,
+        @Param("seatNo", ParseIntPipe) seatNo: number
+    ) {
+        return this.customRoomService.checkVacancy(roomId, seatNo);
     }
 
     @Post()
@@ -37,12 +52,4 @@ export class CustomRoomController {
             allowMic,
         });
     }
-
-    // @Post(":roomNo/seat/:seatNo")
-    // async checkVacancy(
-    //     @Param("roomNo", ParseIntPipe) roomNo: number,
-    //     @Param("seatNo", ParseIntPipe) seatNo: number
-    // ) {
-    //     return this.customRoomService.checkVacancy(roomNo, seatNo);
-    // }
 }
