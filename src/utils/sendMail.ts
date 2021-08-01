@@ -4,55 +4,59 @@ const OAuth2 = google.auth.OAuth2;
 const dotenv = require("dotenv");
 dotenv.config();
 
+const { OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, OAUTH_REFRESH_TOKEN } =
+    process.env;
+
 const OAuth2Client = new OAuth2(
-  process.env.CLIENT_ID,
-  process.env.CLIENT_SECRET,
-  "https://developers.google.com/oauthplayground"
+    OAUTH_CLIENT_ID,
+    OAUTH_CLIENT_SECRET,
+    "https://developers.google.com/oauthplayground"
 );
 
 OAuth2Client.setCredentials({
-  refresh_token: process.env.REFRESH_TOKEN,
+    refresh_token: OAUTH_REFRESH_TOKEN,
 });
 
-function html(secret) {
-  return `
+function html(secret: string) {
+    return `
     <span>
         새로운 계정 생성을 위해 <b>${secret}</b>을 정확히 입력해 주세요
     </span>;
 `;
 }
 
-export async function sendMail(to, secret) {
-  const accessToken = OAuth2Client.getAccessToken();
+export async function sendMail(to: string, secret: string) {
+    const accessToken = OAuth2Client.getAccessToken();
 
-  const googleTransport = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
-      auth: {
-        type: "OAuth2",
-        user: "eagloo.yonsei@gmail.com",
-        clientId: process.env.CLIENT_ID,
-        clientSecret: process.env.CLIENT_SECRET,
-        refreshToken: process.env.REFRESH_TOKEN,
-        accessToken,
-        expires: 3600,
-      },
-    }),
-    mailOptions = {
-      from: "이글루 Eagloo <eagloo.yonsei@gmail.com>",
-      to: `${to}@yonsei.ac.kr`,
-      subject: "이글루 회원가입 인증 메일입니다",
-      html: html(secret),
-    };
+    const googleTransport = nodemailer.createTransport({
+            service: "gmail",
+            host: "smtp.gmail.com",
+            port: 587,
+            secure: true,
+            auth: {
+                type: "OAuth2",
+                user: "eagloo.yonsei@gmail.com",
+                clientId: OAUTH_CLIENT_ID,
+                clientSecret: OAUTH_CLIENT_SECRET,
+                refreshToken: OAUTH_REFRESH_TOKEN,
+                accessToken,
+                expires: 3600,
+            },
+        }),
+        mailOptions = {
+            from: "이글루 Eagloo <eagloo.yonsei@gmail.com>",
+            to: `${to}@yonsei.ac.kr`,
+            subject: "이글루 회원가입 인증 메일입니다",
+            html: html(secret),
+        };
 
-  try {
-    await googleTransport.sendMail(mailOptions);
-    googleTransport.close();
-    return true;
-  } catch (error) {
-    console.log(`${to}@yonsei.ac.kr 메일 전송에 실패하였습니다`);
-    console.log(error);
-    return false;
-  }
+    try {
+        await googleTransport.sendMail(mailOptions);
+        googleTransport.close();
+        return true;
+    } catch (error) {
+        console.log(`${to}@yonsei.ac.kr 메일 전송에 실패하였습니다`);
+        console.log(error);
+        return false;
+    }
 }
