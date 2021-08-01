@@ -65,10 +65,10 @@ export class UserService {
                 where: { email },
             });
             if (user) {
-                if (user.authenticated) {
+                if (user.authenticated && user.password !== "eagloo") {
                     return {
                         success: false,
-                        errorMessage: "이미 사용 중인 메일 주소입니다",
+                        errorMessage: "이미 사용 중인 메일 주소입니다.",
                     };
                 } else {
                     await prisma.user.update({
