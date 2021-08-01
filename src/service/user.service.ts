@@ -77,7 +77,7 @@ export class UserService {
                     });
                     // TODO
                     // sendMail 발송 오류 처리
-                    if (sendMail(email, secret)) {
+                    if (await sendMail(email, secret)) {
                         return {
                             success: true,
                             message: `인증 메일이 ${email}@yonsei.ac.kr 로 발송되었습니다`,
@@ -100,7 +100,7 @@ export class UserService {
             });
             // TODO
             // sendMail 발송 오류 처리
-            if (sendMail(email, secret)) {
+            if (await sendMail(email, secret)) {
                 return {
                     success: true,
                     message: `인증 메일이 ${email}@yonsei.ac.kr 로 발송되었습니다`,
