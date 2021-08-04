@@ -50,8 +50,6 @@ export class CustomRoomService {
     joinRoom(roomId: string, newSeat: Seat) {
         const currentRoom = this.rooms.find((room) => room.id === roomId);
         currentRoom?.seats.push(newSeat);
-        console.log(`room info after new user :`);
-        console.dir(this.rooms);
         return currentRoom as CustomRoom;
     }
 
@@ -152,8 +150,6 @@ export class CustomRoomService {
                 }) || [];
             return room;
         });
-        console.log(`custom room info after user leave :`);
-        console.dir(this.rooms);
         return { roomId: exitedRoomId, seatNo: removedSeatNo };
     }
 

@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseIntPipe, Post } from "@nestjs/common";
+import { Controller, Get, Post, Param, ParseIntPipe } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
 import { PublicRoomSocketIoGateway } from "../gateway";
 import { RoomService } from "../service";
@@ -16,16 +16,16 @@ export class RoomController {
         return this.roomService.getAllRooms();
     }
 
-    @Get(":roomNo")
-    async getRoom(@Param("roomNo", ParseIntPipe) roomNo: number) {
-        return this.roomService.findRoom(roomNo);
+    @Get(":roomId")
+    async getRoom(@Param("roomId") roomId: string) {
+        return this.roomService.findRoom(roomId);
     }
 
-    @Post(":roomNo/seat/:seatNo")
+    @Post(":roomId/seat/:seatNo")
     async checkVacancy(
-        @Param("roomNo", ParseIntPipe) roomNo: number,
+        @Param("roomId") roomId: string,
         @Param("seatNo", ParseIntPipe) seatNo: number
     ) {
-        return this.roomService.checkVacancy(roomNo, seatNo);
+        return this.roomService.checkVacancy(roomId, seatNo);
     }
 }

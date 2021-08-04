@@ -50,14 +50,14 @@ export class PublicRoomSocketIoGateway
         const exitedUserInfo = this.roomService.deleteRoomDetailBySocketId(
             socket.id
         );
-        const exitedRoom = this.roomService.findRoom(exitedUserInfo.roomNo);
+        const exitedRoom = this.roomService.findRoom(exitedUserInfo.roomId);
         exitedRoom?.seats.forEach((seat) => {
             this.wss
                 .to(seat.socketId)
                 .emit(Channel.DISCONNECT, exitedUserInfo.seatNo);
         });
         console.log(
-            `${exitedUserInfo.roomNo}번 방 ${exitedUserInfo.seatNo}자리 유저가 퇴장함`
+            `${exitedUserInfo.roomId}번 방 ${exitedUserInfo.seatNo}자리 유저가 퇴장함`
         );
     }
 
@@ -65,12 +65,12 @@ export class PublicRoomSocketIoGateway
     @SubscribeMessage(Channel.JOIN)
     join(
         socket: Socket,
-        payload: { roomNo: number; seatNo: number; userName?: string }
+        payload: { roomId: string; seatNo: number; userName?: string }
     ) {
         console.log(
-            `${socket.id}가 ${payload.roomNo}번 방 ${payload.seatNo}에 입장`
+            `${socket.id}가 ${payload.roomId}번 방 ${payload.seatNo}에 입장`
         );
-        const room = this.roomService.joinRoom(payload.roomNo, {
+        const room = this.roomService.joinRoom(payload.roomId, {
             seatNo: payload.seatNo,
             socketId: socket.id,
             userName: payload.userName,
@@ -110,9 +110,9 @@ export class PublicRoomSocketIoGateway
     }
 
     @SubscribeMessage("exile")
-    exile(payload: { roomNo: number; seatNo: number }) {
+    exile(payload: { roomId: string; seatNo: number }) {
         const beExiledId = this.roomService.findSeat(
-            payload.roomNo,
+            payload.roomId,
             payload.seatNo
         );
         if (beExiledId) {

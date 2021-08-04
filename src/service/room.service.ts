@@ -5,23 +5,28 @@ import { Room, Seat } from "../model";
 export class RoomService {
     private rooms: Room[] = [
         {
-            roomNo: 1,
+            id: "public1",
+            roomName: "공용 스터디룸 1",
             seats: [],
         },
         {
-            roomNo: 2,
+            id: "public2",
+            roomName: "공용 스터디룸 2",
             seats: [],
         },
         {
-            roomNo: 3,
+            id: "public3",
+            roomName: "공용 스터디룸 3",
             seats: [],
         },
         {
-            roomNo: 4,
+            id: "public4",
+            roomName: "공용 스터디룸 4",
             seats: [],
         },
         {
-            roomNo: 5,
+            id: "public5",
+            roomName: "공용 스터디룸 5",
             seats: [],
         },
     ];
@@ -31,9 +36,17 @@ export class RoomService {
         return this.rooms;
     }
 
-    findSeat(roomNo: number, seatNo: number) {
+    findRoom(roomId: string) {
+        return this.rooms.find((room) => {
+            if (room.id === roomId) {
+                return room;
+            }
+        });
+    }
+
+    findSeat(roomId: string, seatNo: number) {
         const room = this.rooms.find((room) => {
-            room.roomNo === roomNo;
+            room.id === roomId;
         });
         const seat = room?.seats?.find((seat) => {
             seat.seatNo === seatNo;
@@ -45,16 +58,8 @@ export class RoomService {
         }
     }
 
-    findRoom(roomNo: number) {
-        return this.rooms.find((room) => {
-            if (room.roomNo === roomNo) {
-                return room;
-            }
-        });
-    }
-
-    checkVacancy(roomNo: number, seatNo: number) {
-        const room = this.rooms.find((room) => room.roomNo === roomNo);
+    checkVacancy(roomId: string, seatNo: number) {
+        const room = this.rooms.find((room) => room.id === roomId);
         if (!room) {
             return { success: false, type: 1 };
         }
@@ -65,22 +70,14 @@ export class RoomService {
         return { success: true };
     }
 
-    joinRoom(roomNo: number, newSeat: Seat) {
-        const currentRoom = this.rooms.find((room) => room.roomNo === roomNo);
+    joinRoom(roomId: string, newSeat: Seat) {
+        const currentRoom = this.rooms.find((room) => room.id === roomId);
         currentRoom?.seats.push(newSeat);
         return currentRoom as Room;
     }
 
-    findRoomByPositionNo(roomNo: number, seatNo: number) {
-        return this.rooms.find((room) => {
-            if (room.roomNo === roomNo) {
-                return room.seats.find((seat) => seat.seatNo === seatNo);
-            }
-        });
-    }
-
     deleteRoomDetailBySocketId(socketId: string) {
-        let exitedRoomNo: number | undefined;
+        let exitedRoomId: string | undefined;
         let removedSeatNo: number | undefined;
         this.rooms = this.rooms.map((room) => {
             room.seats =
@@ -88,32 +85,33 @@ export class RoomService {
                     if (seat.socketId !== socketId) {
                         return seat;
                     } else {
-                        exitedRoomNo = room.roomNo;
+                        exitedRoomId = room.id;
                         removedSeatNo = seat.seatNo;
                     }
                 }) || [];
             return room;
         });
-        return { roomNo: exitedRoomNo, seatNo: removedSeatNo };
+        return { roomId: exitedRoomId, seatNo: removedSeatNo };
     }
 
     // 이하 아직 쓰일 일 없음
-    addRoom(no: number, roomDetail: Seat) {
-        const currentRoom = this.rooms.find((v) => v.roomNo === no);
+    addRoom(roomId: string, roomDetail: Seat) {
+        const currentRoom = this.rooms.find((room) => room.id === roomId);
         let room;
         if (currentRoom) {
-            this.rooms = this.rooms.map((v) => {
-                if (v.roomNo === no) {
-                    v.seats.push(roomDetail);
+            this.rooms = this.rooms.map((newRooms) => {
+                if (newRooms.id === roomId) {
+                    newRooms.seats.push(roomDetail);
                 }
-                room = v;
-                return v;
+                room = newRooms;
+                return newRooms;
             });
         } else {
             room = roomDetail;
             this.rooms[1] = {
-                roomNo: no,
+                id: roomId,
                 seats: [roomDetail],
+                roomName: "",
             };
             // this.rooms.push({
             //   no,
@@ -123,12 +121,14 @@ export class RoomService {
         return room as Room;
     }
 
-    removeRoom(no: number, positionNo: number) {
-        this.rooms = this.rooms.map((v) => {
-            if (v.roomNo === no) {
-                v.seats = v.seats.filter((subV) => subV.seatNo === positionNo);
+    removeRoom(roomId: string, positionNo: number) {
+        this.rooms = this.rooms.map((room) => {
+            if (room.id === roomId) {
+                room.seats = room.seats.filter(
+                    (seat) => seat.seatNo === positionNo
+                );
             }
-            return v;
+            return room;
         });
     }
 }

@@ -6,6 +6,8 @@ export class Seat {
 }
 
 export class Room {
-    roomNo: number;
+    id: string;
+    roomName: string;
+    roomDescription?: string;
     seats: Seat[];
 }
