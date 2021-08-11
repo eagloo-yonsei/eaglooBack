@@ -1,6 +1,6 @@
 import { Seat } from "./room.model";
 
-export class CustomRoom {
+export interface CustomRoom {
     id: string;
     roomName: string;
     roomDescription?: string;
@@ -12,7 +12,7 @@ export class CustomRoom {
     seats: Seat[];
 }
 
-export class CustomRoomDB {
+export interface CustomRoomDB {
     id: string;
     roomName: string;
     roomDescription?: string;

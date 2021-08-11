@@ -8,18 +8,9 @@ import {
     WebSocketServer,
 } from "@nestjs/websockets";
 import { Server, Socket } from "socket.io";
+import { Channel } from "src/constants";
+import { ChattingContent, Seat } from "src/model";
 import { CustomRoomService } from "../service";
-
-enum Channel {
-    JOIN = "JOIN",
-    DISCONNECT = "DISCONNECT",
-    GET_CURRENT_ROOM = "GET_CURRENT_ROOM",
-    JOIN_ROOM = "JOIN_ROOM",
-    NEW_USER = "NEW_USER",
-    RECEIVING_SIGNAL = "RECEIVING_SIGNAL",
-    SENDING_SIGNAL = "SENDING_SIGNAL",
-    RETURNING_SIGNAL = "RETURNING_SIGNAL",
-}
 
 @WebSocketGateway({ namespace: "/customroom" })
 export class CustomRoomSocketIoGateway
@@ -91,7 +82,7 @@ export class CustomRoomSocketIoGateway
     @SubscribeMessage(Channel.SENDING_SIGNAL)
     sendingSignal(socket: Socket, payload) {
         /* 4. 기존 참여자에게 연결 요청 전달 */
-        console.log(`${socket.id}가 ${payload.userToSignal}에게 연결 요청`);
+        // console.log(`${socket.id}가 ${payload.userToSignal}에게 연결 요청`);
         this.wss.to(payload.userToSignal).emit(Channel.NEW_USER, {
             signal: payload.signal,
             callerId: payload.callerId,
@@ -103,7 +94,7 @@ export class CustomRoomSocketIoGateway
     @SubscribeMessage(Channel.RETURNING_SIGNAL)
     returningSignal(socket: Socket, payload) {
         /* 6. 신규 참여자에게 연결 수락 요청 전달 */
-        console.log(`${socket.id}가 ${payload.callerId}의 연결 요청 수락`);
+        // console.log(`${socket.id}가 ${payload.callerId}의 연결 요청 수락`);
         this.wss.to(payload.callerId).emit(Channel.RECEIVING_SIGNAL, {
             signal: payload.signal,
             id: socket.id,
@@ -118,6 +109,26 @@ export class CustomRoomSocketIoGateway
         );
         if (beExiledId) {
             this.wss.to(beExiledId).emit("exile");
+        }
+    }
+
+    receiveChatting(
+        userSeatNo: number,
+        chattingContent: ChattingContent,
+        receivingSeats: Seat[]
+    ) {
+        try {
+            receivingSeats.forEach((seat) => {
+                if (seat.seatNo !== userSeatNo) {
+                    this.wss.to(seat.socketId).emit(Channel.RECEIVE_CHATTING, {
+                        chattingContent: chattingContent,
+                    });
+                }
+            });
+            return true;
+        } catch (error) {
+            console.error(error);
+            return false;
         }
     }
 }
