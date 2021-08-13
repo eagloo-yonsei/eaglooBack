@@ -13,8 +13,8 @@ export async function setCustomRoom() {
             ...initializedCustomRoom,
             seats: [],
         }));
-    } catch (e) {
-        console.error(e);
+    } catch (error) {
+        console.error(error);
         console.error("사용자 설정방 로딩에 실패했습니다");
     } finally {
         return;

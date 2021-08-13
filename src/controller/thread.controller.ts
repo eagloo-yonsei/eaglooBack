@@ -23,8 +23,8 @@ export class ThreadController {
                 totalThreads,
                 success: true,
             };
-        } catch (err) {
-            console.log(err);
+        } catch (error) {
+            console.error(error);
             response.message = "서버 오류입니다. 잠시 후 다시 시도해 주세요";
             throw new NotFoundException(response.message);
         }
@@ -64,8 +64,8 @@ export class ThreadController {
                 threads,
                 success: true,
             };
-        } catch (err) {
-            console.log(err);
+        } catch (error) {
+            console.error(error);
             throw new NotFoundException(
                 "서버 오류입니다. 잠시 후 다시 시도해 주세요"
             );
@@ -84,8 +84,8 @@ export class ThreadController {
                 totalThreads,
                 success: true,
             };
-        } catch (err) {
-            console.log(err);
+        } catch (error) {
+            console.error(error);
             throw new NotFoundException(
                 "서버 오류입니다. 잠시 후 다시 시도해 주세요"
             );
@@ -131,8 +131,8 @@ export class ThreadController {
                 threads,
                 success: true,
             };
-        } catch (err) {
-            console.log(err);
+        } catch (error) {
+            console.error(error);
             throw new NotFoundException(
                 "서버 오류입니다. 잠시 후 다시 시도해 주세요"
             );
@@ -163,8 +163,8 @@ export class ThreadController {
                 newMainthread,
                 success: true,
             };
-        } catch (err) {
-            console.log(err);
+        } catch (error) {
+            console.error(error);
             throw new NotFoundException(
                 "서버 오류입니다. 잠시 후 다시 시도해 주세요"
             );
@@ -198,8 +198,8 @@ export class ThreadController {
                 newSubthread,
                 success: true,
             };
-        } catch (err) {
-            console.log(err);
+        } catch (error) {
+            console.error(error);
             throw new NotFoundException(
                 "서버 오류입니다. 잠시 후 다시 시도해 주세요"
             );

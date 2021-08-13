@@ -25,16 +25,92 @@ export class TaskService {
                 },
             });
             return {
-                tasks: userWithTasks.tasks,
                 success: true,
+                tasks: userWithTasks.tasks,
             };
-        } catch (err) {
-            console.log("err: ", err);
-            throw new NotFoundException(err);
+        } catch (error) {
+            console.error(error);
+            return {
+                success: false,
+                message: "서버 오류입니다. 잠시 후 다시 시도해 주세요",
+            };
         }
     }
 
-    async createTask(email: string, content: string, importance: number) {}
-    async updateTask(taskId: string, content: string, done: boolean) {}
-    async deleteTask(taskId: string) {}
+    async createTask(email: string, content: string, importance: number) {
+        try {
+            const task = await prisma.task.create({
+                data: {
+                    content,
+                    importance,
+                    user: {
+                        connect: {
+                            email,
+                        },
+                    },
+                },
+                select: {
+                    id: true,
+                    content: true,
+                    done: true,
+                    importance: true,
+                },
+            });
+            return {
+                success: true,
+                task,
+            };
+        } catch (error) {
+            console.error(error);
+            return {
+                success: false,
+                message: "서버 오류입니다. 잠시 후 다시 시도해 주세요",
+            };
+        }
+    }
+
+    async updateTask(
+        taskId: string,
+        done: boolean,
+        content: string,
+        importance: number
+    ) {
+        try {
+            await prisma.task.update({
+                where: {
+                    id: taskId,
+                },
+                data: {
+                    done,
+                    content,
+                    importance,
+                },
+            });
+
+            return { success: true };
+        } catch (error) {
+            console.error(error);
+            return {
+                success: false,
+                message: "서버 오류입니다. 잠시 후 다시 시도해 주세요",
+            };
+        }
+    }
+    async deleteTask(taskId: string) {
+        try {
+            await prisma.task.delete({
+                where: {
+                    id: taskId,
+                },
+            });
+
+            return { success: true };
+        } catch (error) {
+            console.error(error);
+            return {
+                success: false,
+                message: "서버 오류입니다. 잠시 후 다시 시도해 주세요",
+            };
+        }
+    }
 }

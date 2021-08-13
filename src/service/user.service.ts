@@ -24,25 +24,25 @@ export class UserService {
             if (!user) {
                 return {
                     success: false,
-                    errorMessage: "일치하는 메일 주소가 없어요.",
+                    message: "일치하는 메일 주소가 없어요.",
                 };
             } else {
                 if (user.banned) {
                     return {
                         success: false,
-                        errorMessage: "신고로 인하여 정지된 계정입니다.",
+                        message: "신고로 인하여 정지된 계정입니다.",
                     };
                 }
                 if (!user.authenticated) {
                     return {
                         success: false,
-                        errorMessage: "아직 인증이 완료되지 않은 계정입니다.",
+                        message: "아직 인증이 완료되지 않은 계정입니다.",
                     };
                 }
                 if (user.password !== password) {
                     return {
                         success: false,
-                        errorMessage: "비밀번호가 일치하지 않아요.",
+                        message: "비밀번호가 일치하지 않아요.",
                     };
                 }
                 return {
@@ -50,11 +50,11 @@ export class UserService {
                     user: user,
                 };
             }
-        } catch (err) {
-            console.error(err);
+        } catch (error) {
+            console.error(error);
             return {
                 success: false,
-                errorMessage: "서버 오류입니다. 잠시 후 다시 시도해 주세요.",
+                message: "서버 오류입니다. 잠시 후 다시 시도해 주세요.",
             };
         }
     }
@@ -68,7 +68,7 @@ export class UserService {
                 if (user.authenticated && user.password !== "eagloo") {
                     return {
                         success: false,
-                        errorMessage: "이미 사용 중인 메일 주소입니다.",
+                        message: "이미 사용 중인 메일 주소입니다.",
                     };
                 } else {
                     await prisma.user.update({
@@ -85,8 +85,7 @@ export class UserService {
                     } else {
                         return {
                             success: false,
-                            errorMessage:
-                                "인증 메일 발송 중 오류가 발생했습니다",
+                            message: "인증 메일 발송 중 오류가 발생했습니다",
                         };
                     }
                 }
@@ -108,14 +107,14 @@ export class UserService {
             } else {
                 return {
                     success: false,
-                    errorMessage: "인증 메일 발송 중 오류가 발생했습니다",
+                    message: "인증 메일 발송 중 오류가 발생했습니다",
                 };
             }
-        } catch (err) {
-            console.error(err);
+        } catch (error) {
+            console.error(error);
             return {
                 success: false,
-                errorMessage: "서버 오류입니다. 잠시 후 다시 시도해 주세요.",
+                message: "서버 오류입니다. 잠시 후 다시 시도해 주세요.",
             };
         }
     }
@@ -128,7 +127,7 @@ export class UserService {
             if (!user) {
                 return {
                     success: false,
-                    errorMessage:
+                    message:
                         "계정 생성이 완료되지 않았습니다. 잠시 후 처음부터 다시 시도해 주세요.",
                 };
             }
@@ -136,7 +135,7 @@ export class UserService {
             if (user.verificationSecret !== givenSecret) {
                 return {
                     success: false,
-                    errorMessage:
+                    message:
                         "인증 단어가 일치하지 않습니다. 단어를 다시 확인해주세요. 인증 단어는 띄어쓰기를 포함합니다.",
                 };
             }
@@ -148,11 +147,11 @@ export class UserService {
             return {
                 success: true,
             };
-        } catch (err) {
-            console.error(err);
+        } catch (error) {
+            console.error(error);
             return {
                 success: false,
-                errorMessage: "서버 오류입니다. 잠시 후 다시 시도해 주세요",
+                message: "서버 오류입니다. 잠시 후 다시 시도해 주세요",
             };
         }
     }
@@ -166,11 +165,11 @@ export class UserService {
             return {
                 success: true,
             };
-        } catch (err) {
-            console.error(err);
+        } catch (error) {
+            console.error(error);
             return {
                 success: false,
-                errorMessage: "서버 오류입니다. 잠시 후 다시 시도해 주세요",
+                message: "서버 오류입니다. 잠시 후 다시 시도해 주세요",
             };
         }
     }
