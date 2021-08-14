@@ -1,31 +1,24 @@
-import { Body, Controller, NotFoundException, Post } from "@nestjs/common";
+import { Body, Controller, Post } from "@nestjs/common";
+import { FeedbackCategory } from ".prisma/client";
+import { FeedbackService } from "src/service/feedback.service";
 import { PrismaService } from "src/service/prisma.service";
 
-@Controller("api/feedback")
+@Controller("feedback")
 export class FeedbackController {
-    constructor(private readonly prismaService: PrismaService) {}
-    @Post("/")
-    async createFeedback(@Body() body) {
+    constructor(
+        private readonly feedbackService: FeedbackService,
+        private readonly prismaService: PrismaService
+    ) {}
+    @Post()
+    async submitFeedback(@Body() body) {
         const email = body.email;
         const content = body.content;
-        const response = { success: false, message: "" };
+        const feedbackCategory = body.feedbackCategory;
 
-        try {
-            await this.prismaService.feedback.create({
-                data: {
-                    user: email,
-                    content,
-                },
-            });
-            response.success = true;
-            return {
-                success: true,
-            };
-        } catch (error) {
-            console.log(error);
-            throw new NotFoundException(
-                "서버 오류입니다. 잠시 후 다시 시도해 주세요"
-            );
-        }
+        return this.feedbackService.submitFeedback(
+            email,
+            content,
+            feedbackCategory
+        );
     }
 }

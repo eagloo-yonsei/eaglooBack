@@ -1,3 +1,5 @@
+// npx prisma migrate dev --name <name>
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -77,13 +79,20 @@ model Feedback {
   user      String
   content   String
   createdAt DateTime @default(now())
-  category  String   @default("overview")
+  category  FeedbackCategory
 }
 
 model Notice {
   id        String   @id @default(uuid())
   content   String
   createdAt DateTime @default(now())
+}
+
+enum FeedbackCategory {
+  GENERAL
+  BUG
+  SUGGESTION
+  ENHANCEMENT
 }
 
 enum College {

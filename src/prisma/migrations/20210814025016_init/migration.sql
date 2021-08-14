@@ -1,4 +1,7 @@
 -- CreateEnum
+CREATE TYPE "FeedbackCategory" AS ENUM ('GENERAL', 'BUG', 'SUGGESTION', 'ENHANCEMENT');
+
+-- CreateEnum
 CREATE TYPE "College" AS ENUM ('General', 'Liberal_Arts', 'Commerce_and_Economics', 'Business', 'Science', 'Engineering', 'Life_Science_and_Biotechnology', 'Theology', 'Social_Sciences', 'Law', 'Music', 'Human_Ecology', 'Educational_Science', 'University_College', 'Underwood_International_College', 'Global_Leadership_Division', 'Medicine', 'Dentistry', 'Nursing', 'Pharmacy');
 
 -- CreateTable
@@ -78,7 +81,7 @@ CREATE TABLE "Feedback" (
     "user" TEXT NOT NULL,
     "content" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "category" TEXT NOT NULL DEFAULT E'overview',
+    "category" "FeedbackCategory" NOT NULL,
 
     PRIMARY KEY ("id")
 );

@@ -4,6 +4,9 @@ const OAuth2 = google.auth.OAuth2;
 const dotenv = require("dotenv");
 dotenv.config();
 
+// TODO (SIGNIFICANT) 메일 전송 Google OAuth2 Refresh 시킬 방법 고안.
+// 추측컨대 deploy가 새로 되는 경우 오류가 발생하는 것 같음.
+
 const { OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET, OAUTH_REFRESH_TOKEN } =
     process.env;
 

@@ -1,7 +1,8 @@
 {
     "scripts": {
         "start": "rm -rf build && nest start --watch",
-        "build": "rm -rf build && nest build"
+        "build:dev": "rm -rf build && nest build",
+        "build": "nest build"
     },
     "prisma": {
         "schema": "src/prisma/schema.prisma"
