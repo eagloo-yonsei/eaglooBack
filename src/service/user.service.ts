@@ -5,17 +5,6 @@ const prisma = new PrismaClient();
 
 @Injectable()
 export class UserService {
-    async getUsers() {
-        try {
-            const users = await prisma.user.findMany({ take: 10 });
-            if (users) {
-                return users;
-            }
-        } catch (error) {
-            return null;
-        }
-    }
-
     async login(email: string, password: string) {
         try {
             const user = await prisma.user.findUnique({
@@ -170,6 +159,69 @@ export class UserService {
             return {
                 success: false,
                 message: "서버 오류입니다. 잠시 후 다시 시도해 주세요",
+            };
+        }
+    }
+
+    async checkNickNameDuplicate(nickName: string) {
+        try {
+            const user = await prisma.user.findUnique({
+                where: { nickName },
+            });
+
+            if (user) {
+                return {
+                    success: false,
+                    message: "이미 사용 중인 닉네임입니다.",
+                };
+            }
+
+            return { success: true, message: "사용 가능한 닉네임입니다." };
+        } catch (error) {
+            console.error(error);
+            return {
+                success: false,
+                message: "서버 오류입니다. 잠시 후 다시 시도해 주세요",
+            };
+        }
+    }
+
+    async updateUserInfo(
+        email: string,
+        previousPassword: string,
+        nickName?: string,
+        realName?: string,
+        newPassword?: string
+    ) {
+        try {
+            const user = await prisma.user.findUnique({
+                where: { email },
+            });
+
+            if (user.password !== previousPassword) {
+                return {
+                    success: false,
+                    message: "비밀번호가 일치하지 않아요.",
+                };
+            }
+
+            await prisma.user.update({
+                where: { email },
+                data: {
+                    nickName: nickName ? nickName : user.nickName,
+                    realName: realName ? realName : user.realName,
+                    password: newPassword ? newPassword : user.password,
+                },
+            });
+            return {
+                success: true,
+                message: "사용자 정보가 정상적으로 업데이트 되었습니다.",
+            };
+        } catch (error) {
+            console.error(error);
+            return {
+                success: false,
+                message: "서버 오류입니다. 잠시 후 다시 시도해 주세요.",
             };
         }
     }

@@ -13,10 +13,13 @@ model User {
   id                 String       @id @default(uuid())
   email              String       @unique
   password           String       @default("eagloo")
+  nickName           String?      @unique
+  realName           String?
   banned             Boolean      @default(false)
   createdAt          DateTime     @default(now())
   verificationSecret String?
   authenticated      Boolean      @default(false)
+  customLinks        Json[]
   owningRooms        CustomRoom[] @relation(name: "ownership")
   blockedRooms       CustomRoom[] @relation(name: "block")
   tasks              Task[]
@@ -36,7 +39,7 @@ model Task {
 
 model CustomRoom {
   id              String  @id @default(uuid())
-  roomName        String @unique
+  roomName        String  @unique
   roomDescription String?
   ownerId         String
   owner           User    @relation(name: "ownership", fields: [ownerId], references: [id])
@@ -44,7 +47,7 @@ model CustomRoom {
   openToPublic    Boolean
   usePassword     Boolean
   password        String?
-  allowMic       Boolean
+  allowMic        Boolean
 }
 
 model Class {
@@ -75,10 +78,10 @@ model Subthread {
 }
 
 model Feedback {
-  id        String   @id @default(uuid())
+  id        String           @id @default(uuid())
   user      String
   content   String
-  createdAt DateTime @default(now())
+  createdAt DateTime         @default(now())
   category  FeedbackCategory
 }
 

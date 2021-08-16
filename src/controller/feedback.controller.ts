@@ -13,12 +13,8 @@ export class FeedbackController {
     async submitFeedback(@Body() body) {
         const email = body.email;
         const content = body.content;
-        const feedbackCategory = body.feedbackCategory;
+        const category = body.category;
 
-        return this.feedbackService.submitFeedback(
-            email,
-            content,
-            feedbackCategory
-        );
+        return this.feedbackService.submitFeedback(email, content, category);
     }
 }

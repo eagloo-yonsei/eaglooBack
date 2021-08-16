@@ -9,10 +9,13 @@ CREATE TABLE "User" (
     "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL DEFAULT E'eagloo',
+    "nickName" TEXT,
+    "realName" TEXT,
     "banned" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "verificationSecret" TEXT,
     "authenticated" BOOLEAN NOT NULL DEFAULT false,
+    "customLinks" JSONB[],
 
     PRIMARY KEY ("id")
 );
@@ -103,6 +106,9 @@ CREATE TABLE "_block" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User.email_unique" ON "User"("email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User.nickName_unique" ON "User"("nickName");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "CustomRoom.roomName_unique" ON "CustomRoom"("roomName");

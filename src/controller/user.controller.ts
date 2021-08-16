@@ -10,12 +10,7 @@ export class UserController {
         private readonly prismaService: PrismaService
     ) {}
 
-    @Get()
-    async getSomeUsers() {
-        return this.userService.getUsers();
-    }
-
-    @Get(":email/:password")
+    @Get("auth/:email/:password")
     async login(
         @Param("email") email: string,
         @Param("password") password: string
@@ -45,5 +40,27 @@ export class UserController {
         const givenPassword = body.givenPassword;
 
         return this.userService.signUp3(email, givenPassword);
+    }
+
+    @Get("nickName/:nickName")
+    async checkNickNameDuplicate(@Param("nickName") nickName: string) {
+        return this.userService.checkNickNameDuplicate(nickName);
+    }
+
+    @Put("userInfo")
+    async updateUserInfo(@Body() body) {
+        const email = body.email;
+        const nickName = body.nickName;
+        const realName = body.realName;
+        const newPassword = body.newPassword;
+        const previousPassword = body.previousPassword;
+
+        return this.userService.updateUserInfo(
+            email,
+            previousPassword,
+            nickName,
+            realName,
+            newPassword
+        );
     }
 }
