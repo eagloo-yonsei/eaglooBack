@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { Room, Seat } from "../model";
 
 @Injectable()
-export class RoomService {
+export class PublicRoomService {
     private rooms: Room[] = [
         {
             id: "public1",

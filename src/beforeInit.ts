@@ -1,5 +1,5 @@
 import { PrismaClient } from ".prisma/client";
-import { CustomRoom, CustomRoomDB } from "./model/customRoom.model";
+import { CustomRoom, CustomRoomDB } from "./model";
 const prisma = new PrismaClient();
 
 export let customRoom: CustomRoom[];

@@ -9,7 +9,8 @@ import {
 } from "@nestjs/websockets";
 import { Server, Socket } from "socket.io";
 import { Channel } from "src/constants";
-import { RoomService } from "../service";
+import { ChattingContent, Seat } from "src/model";
+import { PublicRoomService } from "../service";
 
 @WebSocketGateway({ namespace: "/publicroom" })
 export class PublicRoomSocketIoGateway
@@ -19,7 +20,7 @@ export class PublicRoomSocketIoGateway
     private wss: Server;
     private logger: Logger = new Logger("PublicRoomGateway");
 
-    constructor(private readonly roomService: RoomService) {}
+    constructor(private readonly roomService: PublicRoomService) {}
 
     afterInit(server: Server) {
         this.logger.log("Initialized!");
@@ -107,6 +108,26 @@ export class PublicRoomSocketIoGateway
         );
         if (beExiledId) {
             this.wss.to(beExiledId).emit("exile");
+        }
+    }
+
+    receiveChatting(
+        userSeatNo: number,
+        chattingContent: ChattingContent,
+        receivingSeats: Seat[]
+    ) {
+        try {
+            receivingSeats.forEach((seat) => {
+                if (seat.seatNo !== userSeatNo) {
+                    this.wss.to(seat.socketId).emit(Channel.RECEIVE_CHATTING, {
+                        chattingContent: chattingContent,
+                    });
+                }
+            });
+            return true;
+        } catch (error) {
+            console.error(error);
+            return false;
         }
     }
 }
