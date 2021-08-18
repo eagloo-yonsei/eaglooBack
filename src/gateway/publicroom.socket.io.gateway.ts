@@ -20,7 +20,7 @@ export class PublicRoomSocketIoGateway
     private wss: Server;
     private logger: Logger = new Logger("PublicRoomGateway");
 
-    constructor(private readonly roomService: PublicRoomService) {}
+    constructor(private readonly publicRoomService: PublicRoomService) {}
 
     afterInit(server: Server) {
         this.logger.log("Initialized!");
@@ -38,10 +38,11 @@ export class PublicRoomSocketIoGateway
     // 소켓 연결이 해제되었을 때
     handleDisconnect(socket: Socket) {
         // 해제된 클라이언트 정보를 서버측 방 정보에서 제거
-        const exitedUserInfo = this.roomService.deleteRoomDetailBySocketId(
-            socket.id
+        const exitedUserInfo =
+            this.publicRoomService.deleteRoomDetailBySocketId(socket.id);
+        const exitedRoom = this.publicRoomService.findRoom(
+            exitedUserInfo.roomId
         );
-        const exitedRoom = this.roomService.findRoom(exitedUserInfo.roomId);
         exitedRoom?.seats.forEach((seat) => {
             this.wss
                 .to(seat.socketId)
@@ -56,16 +57,18 @@ export class PublicRoomSocketIoGateway
     @SubscribeMessage(Channel.JOIN)
     join(
         socket: Socket,
-        payload: { roomId: string; seatNo: number; userName?: string }
+        payload: {
+            roomId: string;
+            newSeat: Seat;
+        }
     ) {
         console.log(
-            `${socket.id}가 ${payload.roomId}번 방 ${payload.seatNo}에 입장`
+            `${socket.id}가 ${payload.roomId}번 방 ${payload.newSeat.seatNo}에 입장`
         );
-        const room = this.roomService.joinRoom(payload.roomId, {
-            seatNo: payload.seatNo,
-            socketId: socket.id,
-            userName: payload.userName,
-        });
+        const room = this.publicRoomService.joinRoom(
+            payload.roomId,
+            payload.newSeat
+        );
 
         // 같은 방의 기존 참여자 정보 추출
         const beforeRoomDetail =
@@ -84,8 +87,7 @@ export class PublicRoomSocketIoGateway
         // console.log(`${socket.id}가 ${payload.userToSignal}에게 연결 요청`);
         this.wss.to(payload.userToSignal).emit(Channel.NEW_USER, {
             signal: payload.signal,
-            callerId: payload.callerId,
-            callerSeatNo: payload.callerSeatNo,
+            callerSeatInfo: payload.callerSeatInfo,
         });
     }
 
@@ -102,7 +104,7 @@ export class PublicRoomSocketIoGateway
 
     @SubscribeMessage("exile")
     exile(payload: { roomId: string; seatNo: number }) {
-        const beExiledId = this.roomService.findSeat(
+        const beExiledId = this.publicRoomService.findSeat(
             payload.roomId,
             payload.seatNo
         );

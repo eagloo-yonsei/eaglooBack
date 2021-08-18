@@ -57,16 +57,18 @@ export class CustomRoomSocketIoGateway
     @SubscribeMessage(Channel.JOIN)
     join(
         socket: Socket,
-        payload: { roomId: string; seatNo: number; userName?: string }
+        payload: {
+            roomId: string;
+            newSeat: Seat;
+        }
     ) {
         console.log(
-            `${socket.id}가 ${payload.roomId}방 ${payload.seatNo}에 입장`
+            `${socket.id}가 ${payload.roomId}방 ${payload.newSeat.seatNo}에 입장`
         );
-        const room = this.customRoomService.joinRoom(payload.roomId, {
-            seatNo: payload.seatNo,
-            socketId: socket.id,
-            userName: payload.userName,
-        });
+        const room = this.customRoomService.joinRoom(
+            payload.roomId,
+            payload.newSeat
+        );
 
         // 같은 방의 기존 참여자 정보 추출
         const beforeRoomDetail =
@@ -85,8 +87,7 @@ export class CustomRoomSocketIoGateway
         // console.log(`${socket.id}가 ${payload.userToSignal}에게 연결 요청`);
         this.wss.to(payload.userToSignal).emit(Channel.NEW_USER, {
             signal: payload.signal,
-            callerId: payload.callerId,
-            callerSeatNo: payload.callerSeatNo,
+            callerSeatInfo: payload.callerSeatInfo,
         });
     }
 

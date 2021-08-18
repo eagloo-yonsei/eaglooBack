@@ -2,7 +2,9 @@ export interface Seat {
     /* 자리별 정보 */
     seatNo: number;
     socketId: string;
-    userName?: string;
+    userEmail: string;
+    userNickName?: string;
+    endTime: number;
 }
 
 export interface Room {
