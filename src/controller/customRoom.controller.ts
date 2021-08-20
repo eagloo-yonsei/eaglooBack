@@ -1,13 +1,6 @@
-import {
-    Controller,
-    Get,
-    Post,
-    Param,
-    Body,
-    ParseIntPipe,
-} from "@nestjs/common";
+import { Controller, Get, Post, Param, Body } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
-import { CustomRoomService } from "src/service/customRoom.service";
+import { CustomRoomService, UserInRoomService } from "../service";
 import { CustomRoomSocketIoGateway } from "src/gateway";
 import { ChattingContent } from "src/model";
 
@@ -16,6 +9,7 @@ import { ChattingContent } from "src/model";
 export class CustomRoomController {
     constructor(
         private readonly customRoomService: CustomRoomService,
+        private readonly userInRoomService: UserInRoomService,
         private readonly customRoomSocket: CustomRoomSocketIoGateway
     ) {}
 
@@ -26,15 +20,29 @@ export class CustomRoomController {
 
     @Get(":roomId")
     async getRoom(@Param("roomId") roomId: string) {
-        return this.customRoomService.findRoom(roomId);
+        return this.customRoomService.getRoom(roomId);
     }
 
-    @Post(":roomId/seat/:seatNo")
-    async checkVacancy(
-        @Param("roomId") roomId: string,
-        @Param("seatNo", ParseIntPipe) seatNo: number
-    ) {
+    @Post("checkVacancy")
+    async checkVacancy(@Body() body) {
+        const roomId = body.roomId;
+        const seatNo = body.seatNo;
         return this.customRoomService.checkVacancy(roomId, seatNo);
+    }
+
+    @Post("joinRoom")
+    async joinRoom(@Body() body) {
+        const roomId = body.roomId;
+        const newSeat = body.newSeat;
+
+        this.userInRoomService.addSocketToSeatInfo(
+            newSeat.socketId,
+            roomId,
+            newSeat.seatNo,
+            newSeat.userEmail
+        );
+
+        return this.customRoomService.joinRoom(roomId, newSeat);
     }
 
     @Post("chat")
@@ -43,9 +51,9 @@ export class CustomRoomController {
         const userSeatNo: number = body.userSeatNo;
         const chattingContent: ChattingContent = body.chattingContent;
 
-        const room = this.customRoomService.findRoom(roomId);
+        const room = this.customRoomService.getRoom(roomId);
         if (!room) {
-            return { success: false };
+            return { success: false, message: "잘못된 요청입니다." };
         }
 
         if (
@@ -57,7 +65,10 @@ export class CustomRoomController {
         ) {
             return { success: true };
         } else {
-            return { success: false };
+            return {
+                success: false,
+                message: "채팅을 전송하는 데 실패했습니다.",
+            };
         }
     }
 

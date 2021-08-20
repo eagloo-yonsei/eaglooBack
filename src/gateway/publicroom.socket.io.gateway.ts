@@ -1,4 +1,4 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Logger } from "@nestjs/common";
 import {
     OnGatewayConnection,
     OnGatewayDisconnect,
@@ -10,7 +10,7 @@ import {
 import { Server, Socket } from "socket.io";
 import { Channel } from "src/constants";
 import { ChattingContent, Seat } from "src/model";
-import { PublicRoomService } from "../service";
+import { PublicRoomService, UserInRoomService } from "../service";
 
 @WebSocketGateway({ namespace: "/publicroom" })
 export class PublicRoomSocketIoGateway
@@ -20,10 +20,13 @@ export class PublicRoomSocketIoGateway
     private wss: Server;
     private logger: Logger = new Logger("PublicRoomGateway");
 
-    constructor(private readonly publicRoomService: PublicRoomService) {}
+    constructor(
+        private readonly publicRoomService: PublicRoomService,
+        private readonly userInRoomService: UserInRoomService
+    ) {}
 
     afterInit(server: Server) {
-        this.logger.log("Initialized!");
+        this.logger.log("PublicRoom WSS Initialized");
     }
 
     // 소켓이 연결되었을 때
@@ -37,79 +40,75 @@ export class PublicRoomSocketIoGateway
 
     // 소켓 연결이 해제되었을 때
     handleDisconnect(socket: Socket) {
-        // 해제된 클라이언트 정보를 서버측 방 정보에서 제거
-        const exitedUserInfo =
-            this.publicRoomService.deleteRoomDetailBySocketId(socket.id);
-        const exitedRoom = this.publicRoomService.findRoom(
-            exitedUserInfo.roomId
+        console.info(`${socket.id} disconnected :`);
+        const exitedUserInfo = this.userInRoomService.getSeatInfoBySocketId(
+            socket.id
         );
-        exitedRoom?.seats.forEach((seat) => {
-            this.wss
-                .to(seat.socketId)
-                .emit(Channel.DISCONNECT, exitedUserInfo.seatNo);
-        });
-        console.log(
-            `${exitedUserInfo.roomId}번 방 ${exitedUserInfo.seatNo}자리 유저가 퇴장함`
-        );
-    }
 
-    /* 1. 방참가 */
-    @SubscribeMessage(Channel.JOIN)
-    join(
-        socket: Socket,
-        payload: {
-            roomId: string;
-            newSeat: Seat;
+        if (!exitedUserInfo) {
+            console.log(
+                `${socket.id} 소켓 연결 해제 중 오류가 발생했습니다 : 일치하는 사용자 정보가 없습니다.`
+            );
+        } else {
+            console.log(
+                `(@Public Room Socket) ${exitedUserInfo.roomId}방 ${exitedUserInfo.seatNo}번 자리 유저(${exitedUserInfo.userEmail}) 퇴실`
+            );
+
+            this.userInRoomService.deleteSocketToSeatInfo(socket.id);
+
+            this.publicRoomService.quitRoom(
+                exitedUserInfo.roomId,
+                exitedUserInfo.seatNo
+            );
+
+            const exitedRoom = this.publicRoomService.getRoom(
+                exitedUserInfo.roomId
+            );
+
+            // console.log(`(@publicRoomSocket) ${exitedRoom.id} 방 정보:`);
+            // console.dir(exitedRoom.seats);
+
+            exitedRoom?.seats?.forEach((seat) => {
+                this.wss
+                    .to(seat.socketId)
+                    .emit(Channel.DISCONNECT, exitedUserInfo.seatNo);
+            });
         }
-    ) {
-        console.log(
-            `${socket.id}가 ${payload.roomId}번 방 ${payload.newSeat.seatNo}에 입장`
-        );
-        const room = this.publicRoomService.joinRoom(
-            payload.roomId,
-            payload.newSeat
-        );
-
-        // 같은 방의 기존 참여자 정보 추출
-        const beforeRoomDetail =
-            room?.seats.filter((seat) => seat.socketId !== socket.id) || [];
-
-        // console.log(`기존 참여자 정보 : ${beforeRoomDetail}`);
-
-        /* 2. 신규 참여자에게 기존 사용자들 정보 발신 */
-        socket.emit(Channel.GET_CURRENT_ROOM, beforeRoomDetail);
     }
 
     /* 3. 기존 사용자에게 연결 요청 (front의 createPeer() 부분에서 호출) */
-    @SubscribeMessage(Channel.SENDING_SIGNAL)
+    @SubscribeMessage(Channel.REQUEST_PEER_CONNECTION)
     sendingSignal(socket: Socket, payload) {
         /* 4. 기존 참여자에게 연결 요청 전달 */
         // console.log(`${socket.id}가 ${payload.userToSignal}에게 연결 요청`);
-        this.wss.to(payload.userToSignal).emit(Channel.NEW_USER, {
-            signal: payload.signal,
-            callerSeatInfo: payload.callerSeatInfo,
-        });
+        this.wss
+            .to(payload.userToSignal)
+            .emit(Channel.PEER_CONNECTION_REQUESTED, {
+                signal: payload.signal,
+                callerSeatInfo: payload.callerSeatInfo,
+            });
     }
 
     /* 5. 기존 참여자가 신규 참여자의 연결 요청 수락 (front의 addPeer() 부분에서 호출) */
-    @SubscribeMessage(Channel.RETURNING_SIGNAL)
+    @SubscribeMessage(Channel.ACCEPT_PEER_CONNECTION_REQUEST)
     returningSignal(socket: Socket, payload) {
         /* 6. 신규 참여자에게 연결 수락 요청 전달 */
         // console.log(`${socket.id}가 ${payload.callerId}의 연결 요청 수락`);
-        this.wss.to(payload.callerId).emit(Channel.RECEIVING_SIGNAL, {
-            signal: payload.signal,
-            id: socket.id,
-        });
+        this.wss
+            .to(payload.callerId)
+            .emit(Channel.PEER_CONNECTION_REQUEST_ACCEPTED, {
+                signal: payload.signal,
+                id: socket.id,
+            });
     }
 
-    @SubscribeMessage("exile")
     exile(payload: { roomId: string; seatNo: number }) {
         const beExiledId = this.publicRoomService.findSeat(
             payload.roomId,
             payload.seatNo
         );
         if (beExiledId) {
-            this.wss.to(beExiledId).emit("exile");
+            this.wss.to(beExiledId).emit(Channel.EXILED);
         }
     }
 

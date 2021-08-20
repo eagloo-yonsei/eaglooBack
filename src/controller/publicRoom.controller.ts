@@ -1,22 +1,16 @@
-import {
-    Controller,
-    Body,
-    Get,
-    Post,
-    Param,
-    ParseIntPipe,
-} from "@nestjs/common";
+import { Controller, Body, Get, Post, Param } from "@nestjs/common";
 import { ApiTags } from "@nestjs/swagger";
+import { PublicRoomService, UserInRoomService } from "../service";
 import { PublicRoomSocketIoGateway } from "../gateway";
-import { PublicRoomService } from "../service";
 import { ChattingContent } from "src/model";
 
-@ApiTags("방정보")
+@ApiTags("공용방정보")
 @Controller("publicroom")
 export class PublicRoomController {
     constructor(
-        private readonly publicRoomSocketIoGateway: PublicRoomSocketIoGateway,
-        private readonly publicRoomService: PublicRoomService
+        private readonly publicRoomService: PublicRoomService,
+        private readonly userInRoomService: UserInRoomService,
+        private readonly publicRoomSocketIoGateway: PublicRoomSocketIoGateway
     ) {}
 
     @Get()
@@ -26,15 +20,30 @@ export class PublicRoomController {
 
     @Get(":roomId")
     async getRoom(@Param("roomId") roomId: string) {
-        return this.publicRoomService.findRoom(roomId);
+        return this.publicRoomService.getRoom(roomId);
     }
 
-    @Post(":roomId/seat/:seatNo")
-    async checkVacancy(
-        @Param("roomId") roomId: string,
-        @Param("seatNo", ParseIntPipe) seatNo: number
-    ) {
+    @Post("checkVacancy")
+    async checkVacancy(@Body() body) {
+        const roomId = body.roomId;
+        const seatNo = body.seatNo;
+
         return this.publicRoomService.checkVacancy(roomId, seatNo);
+    }
+
+    @Post("joinRoom")
+    async joinRoom(@Body() body) {
+        const roomId = body.roomId;
+        const newSeat = body.newSeat;
+
+        this.userInRoomService.addSocketToSeatInfo(
+            newSeat.socketId,
+            roomId,
+            newSeat.seatNo,
+            newSeat.userEmail
+        );
+
+        return this.publicRoomService.joinRoom(roomId, newSeat);
     }
 
     @Post("chat")
@@ -43,9 +52,9 @@ export class PublicRoomController {
         const userSeatNo: number = body.userSeatNo;
         const chattingContent: ChattingContent = body.chattingContent;
 
-        const room = this.publicRoomService.findRoom(roomId);
+        const room = this.publicRoomService.getRoom(roomId);
         if (!room) {
-            return { success: false };
+            return { success: false, message: "잘못된 요청입니다." };
         }
 
         if (
@@ -57,7 +66,10 @@ export class PublicRoomController {
         ) {
             return { success: true };
         } else {
-            return { success: false };
+            return {
+                success: false,
+                message: "채팅을 전송하는 데 실패했습니다.",
+            };
         }
     }
 }

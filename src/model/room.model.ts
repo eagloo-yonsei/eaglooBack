@@ -7,6 +7,13 @@ export interface Seat {
     endTime: number;
 }
 
+export interface SocketToSeatInfo {
+    socketId: string;
+    roomId: string;
+    seatNo: number;
+    userEmail: string;
+}
+
 export interface Room {
     id: string;
     roomName: string;
