@@ -73,8 +73,10 @@ export class PublicRoomService {
                 message: "방 입장 중 오류가 발생했습니다.",
             };
         }
-        // console.log(`(@publicRoomService) 새 유저 입장 :`);
-        // console.dir(this.rooms);
+        console.log(
+            `(@publicRoomService) 새 유저가 ${currentRoom.roomName} 에 입장했습니다 :`
+        );
+        console.dir(currentRoom);
         return { success: true, roomInfo: currentRoom as Room };
     }
 
