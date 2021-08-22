@@ -1,7 +1,7 @@
 export interface Seat {
     /* 자리별 정보 */
-    seatNo: number;
     socketId: string;
+    seatNo: number;
     userEmail: string;
     userNickName?: string;
     endTime: number;
@@ -12,6 +12,11 @@ export interface SocketToSeatInfo {
     roomId: string;
     seatNo: number;
     userEmail: string;
+}
+
+export enum RoomType {
+    PUBLIC = "PUBLIC",
+    CUSTOM = "CUSTOM",
 }
 
 export interface Room {

@@ -1,10 +1,82 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
+import { User, ConnectedUser } from "src/model";
 import { PrismaClient } from "@prisma/client";
 import { sendMail } from "src/utils/sendMail";
 const prisma = new PrismaClient();
 
 @Injectable()
 export class UserService {
+    private connectedUsers: ConnectedUser[] = [];
+
+    getConnectedUserInfo(socketId?: string, email?: string) {
+        return this.connectedUsers.find((connectedUser) => {
+            return (
+                connectedUser.socketId === socketId ||
+                connectedUser.userInfo.email === email
+            );
+        });
+    }
+
+    // 소켓 연결 시 정보 추가
+    connectUser(socketId: string, userInfo: User) {
+        this.connectedUsers.push({ socketId, userInfo });
+        // console.log(
+        //     `(@User Service) 접속 유저 : ${this.connectedUsers.length}`
+        // );
+    }
+
+    // 소켓 연결 해제 시(로그아웃 or 창 닫음) 정보 삭제
+    disconnectUser(socketId: string) {
+        let disconnectedUser: ConnectedUser;
+        this.connectedUsers = this.connectedUsers.filter((connectedUser) => {
+            return connectedUser.socketId !== socketId;
+        });
+        // console.log(
+        //     `(@User Service) 소켓 연결 해제 후 접속 유저 : ${this.connectedUsers.length}`
+        // );
+        // console.dir(this.connectedUsers);
+        return disconnectedUser;
+    }
+
+    // 입실 시 기존에 연결된 사용자 정보에 방 id와 자리번호 추가
+    // TODO (enhancement) userService joinRoom : 나중에 email을 기준으로 search 하도록 바꿀 것.
+    // joinRoom(email: string, roomId: string, seatNo: number) {
+    joinRoom(socketId: string, roomId: string, seatNo: number) {
+        let joinedUser: ConnectedUser;
+        this.connectedUsers.map((connectedUser) => {
+            if (connectedUser.socketId !== socketId) {
+                return connectedUser;
+            } else {
+                joinedUser = connectedUser;
+                connectedUser.roomId = roomId;
+                connectedUser.seatNo = seatNo;
+                return connectedUser;
+            }
+        });
+        // console.log(
+        //     `(@User Service) ${socketId}(${joinedUser.userInfo.email})이 ${roomId}방 ${seatNo}번 자리에 입장`
+        // );
+    }
+
+    // 퇴실 시 기존에 연결된 사용자 정보에서 방 id와 자리번호 삭제
+    quitRoom(socketId: string) {
+        let quitUser: ConnectedUser;
+        this.connectedUsers.map((connectedUser) => {
+            if (connectedUser.socketId !== socketId) {
+                return connectedUser;
+            } else {
+                quitUser = connectedUser;
+                connectedUser.roomId = undefined;
+                connectedUser.seatNo = undefined;
+                return connectedUser;
+            }
+        });
+        // console.log(
+        //     `(@User Service) ${socketId}(${quitUser.userInfo.email})이 ${quitUser.roomId}방 ${quitUser.seatNo}번 자리에서 퇴장`
+        // );
+        return quitUser;
+    }
+
     async login(email: string, password: string) {
         try {
             const user = await prisma.user.findUnique({

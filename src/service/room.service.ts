@@ -1,12 +1,48 @@
 import { Injectable } from "@nestjs/common";
-import { customRoom } from "src/beforeInit";
-import { Seat, CustomRoom, CustomRoomCreationProp } from "../model";
+import { customRooms } from "src/beforeInit";
+import {
+    RoomType,
+    Room,
+    CustomRoom,
+    Seat,
+    SocketToSeatInfo,
+    CustomRoomCreationProp,
+} from "../model";
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 @Injectable()
-export class CustomRoomService {
-    private rooms = customRoom;
+export class RoomService {
+    private rooms: (Room | CustomRoom)[] = [
+        {
+            id: "public1",
+            roomName: "공용 스터디룸 1",
+            seats: [],
+        },
+        {
+            id: "public2",
+            roomName: "공용 스터디룸 2",
+            seats: [],
+        },
+        {
+            id: "public3",
+            roomName: "공용 스터디룸 3",
+            seats: [],
+        },
+        {
+            id: "public4",
+            roomName: "공용 스터디룸 4",
+            seats: [],
+        },
+        {
+            id: "public5",
+            roomName: "공용 스터디룸 5",
+            seats: [],
+        },
+
+        ...customRooms,
+    ];
+
     constructor() {}
 
     // 엔트리에서 모든 방 정보 요청
@@ -31,12 +67,13 @@ export class CustomRoomService {
     }
 
     // 입장 성공 후 방 정보에 편입 + 기존 방 정보 반환
-    joinRoom(roomId: string, newSeat: Seat) {
-        let currentRoom: CustomRoom;
+    joinRoom(roomType: RoomType, roomId: string, newSeat: Seat) {
+        let currentRoom: Room | CustomRoom;
         this.rooms.map((room) => {
             if (room.id !== roomId) {
                 return room;
             } else {
+                // currentRoom = room; -> 이렇게 주면 얕은 복사가 되어 push 된 정보 (스스로의 정보까지 넘겨줌)
                 currentRoom = JSON.parse(JSON.stringify(room));
                 room.seats.push(newSeat);
                 return room;
@@ -44,14 +81,15 @@ export class CustomRoomService {
         });
 
         if (!currentRoom) {
-            return {
-                success: false,
-                message: "방 입장 중 오류가 발생했습니다.",
-            };
+            return undefined;
         }
-        // console.log(`(@publicRoomService) 새 유저 입장 :`);
-        // console.dir(this.rooms);
-        return { success: true, roomInfo: currentRoom as CustomRoom };
+        // console.log(
+        //     `(@Room Service) 새 유저가 ${currentRoom.roomName}방 ${newSeat.seatNo}번 자리에 입장. 현재 인원 :`
+        // );
+        // console.dir(currentRoom);
+        return roomType === RoomType.PUBLIC
+            ? (currentRoom as Room)
+            : (currentRoom as CustomRoom);
     }
 
     getRoom(roomId: string) {
@@ -77,6 +115,7 @@ export class CustomRoomService {
     }
 
     quitRoom(roomId: string, seatNo: number) {
+        let exitedRoom: Room | CustomRoom;
         this.rooms = this.rooms.map((room) => {
             if (room.id !== roomId) {
                 return room;
@@ -85,50 +124,26 @@ export class CustomRoomService {
                     room.seats?.filter((seat) => {
                         return seat.seatNo !== seatNo;
                     }) || [];
+                exitedRoom = room;
                 return room;
             }
         });
-        // console.log(`(@customRoomService) customRoom condition after quit:`);
-        // console.dir(this.rooms);
+        // console.log(
+        //     `(@Room Service) ${roomId}방 ${seatNo}번 유저 퇴실. 남은 인원 :`
+        // );
+        // console.dir(exitedRoom);
+        return exitedRoom;
     }
 
-    addRoom({
-        id,
-        roomName,
-        roomDescription,
-        ownerId,
-        openToPublic,
-        usePassword,
-        password,
-        allowMic,
-        seats,
-    }: CustomRoom) {
-        this.rooms.push({
-            id,
-            roomName,
-            ownerId,
-            openToPublic,
-            usePassword,
-            allowMic,
-            roomDescription,
-            password,
-            seats,
-        });
+    addRoom(newRoom: CustomRoom) {
+        this.rooms.push(newRoom);
     }
 
-    async createRoom({
-        roomName,
-        roomDescription,
-        ownerId,
-        openToPublic,
-        usePassword,
-        password,
-        allowMic,
-    }: CustomRoomCreationProp) {
+    async createRoom(newRoom: CustomRoomCreationProp) {
         try {
             const customRoom = await prisma.customRoom.findUnique({
                 where: {
-                    roomName,
+                    roomName: newRoom.roomName,
                 },
             });
 
@@ -140,26 +155,12 @@ export class CustomRoomService {
             }
 
             const createdRoom = await prisma.customRoom.create({
-                data: {
-                    roomName,
-                    roomDescription,
-                    ownerId,
-                    openToPublic,
-                    usePassword,
-                    password,
-                    allowMic,
-                },
+                data: newRoom,
             });
 
             this.addRoom({
                 id: createdRoom.id,
-                roomName,
-                roomDescription,
-                ownerId,
-                openToPublic,
-                usePassword,
-                password,
-                allowMic,
+                ...newRoom,
                 seats: [],
             });
 
@@ -173,26 +174,4 @@ export class CustomRoomService {
             };
         }
     }
-
-    deleteRoomDetailBySocketId(socketId: string) {
-        let exitedRoomId: string | undefined;
-        let removedSeatNo: number | undefined;
-        this.rooms = this.rooms.map((room) => {
-            room.seats =
-                room.seats?.filter((seat) => {
-                    if (seat.socketId !== socketId) {
-                        return seat;
-                    } else {
-                        exitedRoomId = room.id;
-                        removedSeatNo = seat.seatNo;
-                    }
-                }) || [];
-            return room;
-        });
-        return { roomId: exitedRoomId, seatNo: removedSeatNo };
-    }
-
-    async modifyRoom() {}
-
-    async deleteRoom() {}
 }
