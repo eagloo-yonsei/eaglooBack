@@ -2,14 +2,14 @@ import { PrismaClient } from ".prisma/client";
 import { CustomRoom, CustomRoomDB } from "./model";
 const prisma = new PrismaClient();
 
-export let customRoom: CustomRoom[];
+export let customRooms: CustomRoom[];
 
 export async function setCustomRoom() {
     try {
         const initializedCustomRooms: CustomRoomDB[] =
             await prisma.customRoom.findMany();
 
-        customRoom = initializedCustomRooms.map((initializedCustomRoom) => ({
+        customRooms = initializedCustomRooms.map((initializedCustomRoom) => ({
             ...initializedCustomRoom,
             seats: [],
         }));
