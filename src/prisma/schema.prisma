@@ -16,6 +16,8 @@ model User {
   nickName           String?      @unique
   realName           String?
   banned             Boolean      @default(false)
+  isAdmin             Boolean      @default(false)
+  isTester             Boolean      @default(false)
   createdAt          DateTime     @default(now())
   verificationSecret String?
   authenticated      Boolean      @default(false)
@@ -81,6 +83,7 @@ model Feedback {
   id        String           @id @default(uuid())
   user      String
   content   String
+  comments  String[]
   createdAt DateTime         @default(now())
   category  FeedbackCategory
 }

@@ -7,13 +7,6 @@ export interface Seat {
     endTime: number;
 }
 
-export interface SocketToSeatInfo {
-    socketId: string;
-    roomId: string;
-    seatNo: number;
-    userEmail: string;
-}
-
 export enum RoomType {
     PUBLIC = "PUBLIC",
     CUSTOM = "CUSTOM",

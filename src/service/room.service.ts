@@ -5,7 +5,6 @@ import {
     Room,
     CustomRoom,
     Seat,
-    SocketToSeatInfo,
     CustomRoomCreationProp,
 } from "../model";
 import { PrismaClient } from "@prisma/client";
@@ -102,10 +101,10 @@ export class RoomService {
 
     findSeat(roomId: string, seatNo: number) {
         const room = this.rooms.find((room) => {
-            room.id === roomId;
+            return room.id === roomId;
         });
         const seat = room?.seats?.find((seat) => {
-            seat.seatNo === seatNo;
+            return seat.seatNo === seatNo;
         });
         if (seat) {
             return seat.socketId;

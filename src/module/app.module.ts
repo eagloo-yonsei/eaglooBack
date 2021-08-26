@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 import { SocketIoAdapter } from "src/adapter";
 import { AppController } from "src/controller/app.controller";
 import { RoomController } from "src/controller";
+import { UserController } from "src/controller";
 import { AppSocketIoGateway } from "src/gateway";
 import { AppService } from "src/service/app.service";
 import { RoomService } from "src/service";
@@ -11,11 +12,10 @@ import { FeedbackModule } from "./feedback.module";
 // import { RoomModule } from "./room.module";
 import { TaskModule } from "./task.module";
 import { ThreadModule } from "./thread.module";
-import { UserModule } from "./user.module";
 
 @Module({
-    imports: [FeedbackModule, TaskModule, ThreadModule, UserModule],
-    controllers: [AppController, RoomController],
+    imports: [FeedbackModule, TaskModule, ThreadModule],
+    controllers: [AppController, RoomController, UserController],
     providers: [
         AppService,
         SocketIoAdapter,

@@ -1,14 +1,15 @@
-import { Body, Controller, Post } from "@nestjs/common";
-import { FeedbackCategory } from ".prisma/client";
+import { Body, Controller, Get, Post } from "@nestjs/common";
 import { FeedbackService } from "src/service/feedback.service";
-import { PrismaService } from "src/service/prisma.service";
 
 @Controller("feedback")
 export class FeedbackController {
-    constructor(
-        private readonly feedbackService: FeedbackService,
-        private readonly prismaService: PrismaService
-    ) {}
+    constructor(private readonly feedbackService: FeedbackService) {}
+
+    @Get()
+    async getAllFeedback() {
+        return this.feedbackService.getAllFeedback();
+    }
+
     @Post()
     async submitFeedback(@Body() body) {
         const email = body.email;
