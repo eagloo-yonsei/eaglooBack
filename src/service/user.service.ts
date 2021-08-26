@@ -8,6 +8,14 @@ const prisma = new PrismaClient();
 export class UserService {
     private connectedUsers: ConnectedUser[] = [];
 
+    constructor() {}
+
+    getAllConnectedUser() {
+        // console.log("모든 접속 인원 반환 중..");
+        // console.dir(this.connectedUsers);
+        return this.connectedUsers;
+    }
+
     getConnectedUserInfo(socketId?: string, email?: string) {
         return this.connectedUsers.find((connectedUser) => {
             return (
@@ -20,9 +28,10 @@ export class UserService {
     // 소켓 연결 시 정보 추가
     connectUser(socketId: string, userInfo: User) {
         this.connectedUsers.push({ socketId, userInfo });
-        // console.log(
-        //     `(@User Service) 접속 유저 : ${this.connectedUsers.length}`
-        // );
+        console.log(
+            `(@User Service) 새 유저 로그인. 현재 접속 인원: ${this.connectedUsers.length}`
+        );
+        // console.dir(this.connectedUsers);
     }
 
     // 소켓 연결 해제 시(로그아웃 or 창 닫음) 정보 삭제
@@ -31,10 +40,9 @@ export class UserService {
         this.connectedUsers = this.connectedUsers.filter((connectedUser) => {
             return connectedUser.socketId !== socketId;
         });
-        // console.log(
-        //     `(@User Service) 소켓 연결 해제 후 접속 유저 : ${this.connectedUsers.length}`
-        // );
-        // console.dir(this.connectedUsers);
+        console.log(
+            `(@User Service) 유저 로그아웃. 현재 접속 인원: ${this.connectedUsers.length}`
+        );
         return disconnectedUser;
     }
 
@@ -75,6 +83,16 @@ export class UserService {
         //     `(@User Service) ${socketId}(${quitUser.userInfo.email})이 ${quitUser.roomId}방 ${quitUser.seatNo}번 자리에서 퇴장`
         // );
         return quitUser;
+    }
+
+    async getAllUser() {
+        try {
+            const allUser = await prisma.user.findMany();
+            return { success: true, allUser: allUser as User[] };
+        } catch (error) {
+            console.error(error);
+            return { success: false };
+        }
     }
 
     async login(email: string, password: string) {
@@ -280,6 +298,8 @@ export class UserService {
             await prisma.user.update({
                 where: { email },
                 data: {
+                    // TODO (code clearance) 유저 닉네임/실명/비번 업데이트시
+                    // 인자를 따로 받지 말고 통짜 object로 받을 것 (Task도)
                     nickName: nickName ? nickName : user.nickName,
                     realName: realName ? realName : user.realName,
                     password: newPassword ? newPassword : user.password,
@@ -288,6 +308,42 @@ export class UserService {
             return {
                 success: true,
                 message: "사용자 정보가 정상적으로 업데이트 되었습니다.",
+            };
+        } catch (error) {
+            console.error(error);
+            return {
+                success: false,
+                message: "서버 오류입니다. 잠시 후 다시 시도해 주세요.",
+            };
+        }
+    }
+
+    async createTestUser(email: string, password: string) {
+        try {
+            const user = await prisma.user.findUnique({
+                where: { email },
+            });
+
+            if (user) {
+                return {
+                    success: false,
+                    message: "같은 아이디가 이미 존재합니다",
+                };
+            }
+
+            await prisma.user.create({
+                data: {
+                    email,
+                    password,
+                    authenticated: true,
+                    isTester: true,
+                    verificationSecret: "-",
+                },
+            });
+
+            return {
+                success: true,
+                message: "테스트 유저 생성이 완료되었습니다",
             };
         } catch (error) {
             console.error(error);

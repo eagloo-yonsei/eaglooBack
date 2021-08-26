@@ -62,4 +62,13 @@ export class RoomController {
 
         return this.roomService.createRoom(newRoom);
     }
+
+    @Post("exile")
+    async exile(@Body() body) {
+        const roomId = body.roomId;
+        const seatNo = body.seatNo;
+        const message = body.message;
+
+        return this.appSocketIoGateway.exile(roomId, seatNo, message);
+    }
 }

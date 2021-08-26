@@ -10,7 +10,7 @@ import {
 import { Server, Socket } from "socket.io";
 import { RoomService, UserService } from "src/service";
 import { Channel } from "src/constants";
-import { ChattingContent, RoomType, Seat, User } from "src/model";
+import { ChattingContent, RoomType, Seat, MinimalUser } from "src/model";
 import Peer from "simple-peer";
 
 @WebSocketGateway()
@@ -37,7 +37,7 @@ export class AppSocketIoGateway
         if (typeof socket.handshake.query.userInfo === "string") {
             this.userService.connectUser(
                 socket.id,
-                JSON.parse(socket.handshake.query.userInfo) as User
+                JSON.parse(socket.handshake.query.userInfo) as MinimalUser
             );
         }
     }
@@ -170,15 +170,16 @@ export class AppSocketIoGateway
         });
     }
 
-    @SubscribeMessage("exile")
-    exile(payload: { roomId: string; seatNo: number }) {
-        const beExiledId = this.roomService.findSeat(
-            payload.roomId,
-            payload.seatNo
-        );
+    exile(roomId: string, seatNo: number, message: string) {
+        const beExiledId = this.roomService.findSeat(roomId, seatNo);
         if (beExiledId) {
-            this.wss.to(beExiledId).emit("exile");
+            this.wss.to(beExiledId).emit(Channel.EXILED, message);
+            return { success: true, message: "유저가 퇴출되었습니다." };
         }
+        return {
+            success: false,
+            message: "조건에 맞는 유저가 없습니다",
+        };
     }
 
     receiveChatting(

@@ -1,14 +1,20 @@
 import { Body, Controller, Get, Param, Post, Put } from "@nestjs/common";
-import { PrismaService } from "src/service/prisma.service";
 import { UserService } from "src/service/user.service";
 import { secretGenerator } from "../utils/secretGenerator";
 
 @Controller("user")
 export class UserController {
-    constructor(
-        private readonly userService: UserService,
-        private readonly prismaService: PrismaService
-    ) {}
+    constructor(private readonly userService: UserService) {}
+
+    @Get()
+    async getAllUser() {
+        return this.userService.getAllUser();
+    }
+
+    @Get("connected")
+    async getAllConnectedUser() {
+        return this.userService.getAllConnectedUser();
+    }
 
     @Get("auth/:email/:password")
     async login(
@@ -16,6 +22,14 @@ export class UserController {
         @Param("password") password: string
     ) {
         return this.userService.login(email, password);
+    }
+
+    @Post("createTestUser")
+    async createTestUser(@Body() body) {
+        const email = body.email;
+        const password = body.password;
+
+        return this.userService.createTestUser(email, password);
     }
 
     @Post()
