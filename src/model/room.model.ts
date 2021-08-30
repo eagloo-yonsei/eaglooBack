@@ -5,6 +5,10 @@ export interface Seat {
     userEmail: string;
     userNickName?: string;
     endTime: number;
+    streamState: {
+        video: boolean;
+        audio: boolean;
+    };
 }
 
 export enum RoomType {

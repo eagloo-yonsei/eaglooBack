@@ -143,8 +143,6 @@ export class AppSocketIoGateway
         payload: { callerId: string; signal: Peer.SignalData }
     ) {
         /* 6. 신규 참여자에게 연결 수락 요청 전달 */
-        // const accepter = this.userService.getConnectedUserInfo(socket.id);
-        // const caller = this.userService.getConnectedUserInfo(payload.callerId);
         // console.log(`${accepter.seatNo}가 ${caller.seatNo}의 연결 요청 수락`);
         this.wss
             .to(payload.callerId)
