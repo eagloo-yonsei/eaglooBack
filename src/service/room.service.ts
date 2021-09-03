@@ -134,6 +134,35 @@ export class RoomService {
         return exitedRoom;
     }
 
+    handleStreamStatus(
+        roomId: string,
+        seatNo: number,
+        handleAudio: boolean,
+        status: boolean
+    ) {
+        this.rooms = this.rooms.map((room) => {
+            if (room.id !== roomId) {
+                return room;
+            } else {
+                room.seats = room.seats.map((seat) => {
+                    if (seat.seatNo !== seatNo) {
+                        return seat;
+                    } else {
+                        // audio만 끄고 키는 것이라면 괜찮지만, video를 건드리는 경우엔 audio는 언제나 false
+                        if (handleAudio) {
+                            seat.streamState.audio = status;
+                        } else {
+                            seat.streamState.audio = false;
+                            seat.streamState.video = status;
+                        }
+                        return seat;
+                    }
+                });
+                return room;
+            }
+        });
+    }
+
     addRoom(newRoom: CustomRoom) {
         this.rooms.push(newRoom);
     }
