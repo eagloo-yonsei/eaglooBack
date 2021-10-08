@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { User, ConnectedUser } from "src/model";
+import { User, ConnectedUser, MinimalUser } from "src/model";
 import { PrismaClient } from "@prisma/client";
 import { sendMail } from "src/utils/sendMail";
 const prisma = new PrismaClient();
@@ -26,7 +26,7 @@ export class UserService {
     }
 
     // 소켓 연결 시 정보 추가
-    connectUser(socketId: string, userInfo: User) {
+    connectUser(socketId: string, userInfo: MinimalUser) {
         this.connectedUsers.push({ socketId, userInfo });
         console.log(
             `(@User Service) 새 유저 로그인. 현재 접속 인원: ${this.connectedUsers.length}`
@@ -88,7 +88,7 @@ export class UserService {
     async getAllUser() {
         try {
             const allUser = await prisma.user.findMany();
-            return { success: true, allUser: allUser as User[] };
+            return { success: true, allUser: allUser };
         } catch (error) {
             console.error(error);
             return { success: false };
@@ -219,10 +219,11 @@ export class UserService {
                 };
             }
 
-            await prisma.user.update({
-                where: { email },
-                data: { authenticated: true },
-            });
+            // await prisma.user.update({
+            //     where: { email },
+            //     data: { authenticated: true },
+            // });
+
             return {
                 success: true,
             };
@@ -240,6 +241,24 @@ export class UserService {
             await prisma.user.update({
                 where: { email },
                 data: { password: givenPassword },
+            });
+            return {
+                success: true,
+            };
+        } catch (error) {
+            console.error(error);
+            return {
+                success: false,
+                message: "서버 오류입니다. 잠시 후 다시 시도해 주세요",
+            };
+        }
+    }
+
+    async signUp4(email: string, nickName: string, realName?: string) {
+        try {
+            await prisma.user.update({
+                where: { email },
+                data: { nickName, realName, authenticated: true },
             });
             return {
                 success: true,
@@ -280,7 +299,6 @@ export class UserService {
         email: string,
         previousPassword: string,
         nickName?: string,
-        realName?: string,
         newPassword?: string
     ) {
         try {
@@ -301,7 +319,6 @@ export class UserService {
                     // TODO (code clearance) 유저 닉네임/실명/비번 업데이트시
                     // 인자를 따로 받지 말고 통짜 object로 받을 것 (Task도)
                     nickName: nickName ? nickName : user.nickName,
-                    realName: realName ? realName : user.realName,
                     password: newPassword ? newPassword : user.password,
                 },
             });

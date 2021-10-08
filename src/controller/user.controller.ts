@@ -56,6 +56,15 @@ export class UserController {
         return this.userService.signUp3(email, givenPassword);
     }
 
+    @Put("nickNameAndRealName")
+    async signUpStep4(@Body() body) {
+        const email = body.email;
+        const nickName = body.nickName;
+        const realName = body.realName;
+
+        return this.userService.signUp4(email, nickName, realName);
+    }
+
     @Get("nickName/:nickName")
     async checkNickNameDuplicate(@Param("nickName") nickName: string) {
         return this.userService.checkNickNameDuplicate(nickName);
@@ -65,7 +74,6 @@ export class UserController {
     async updateUserInfo(@Body() body) {
         const email = body.email;
         const nickName = body.nickName;
-        const realName = body.realName;
         const newPassword = body.newPassword;
         const previousPassword = body.previousPassword;
 
@@ -73,7 +81,6 @@ export class UserController {
             email,
             previousPassword,
             nickName,
-            realName,
             newPassword
         );
     }
