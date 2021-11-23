@@ -16,8 +16,8 @@ model User {
   nickName           String?      @unique
   realName           String?
   banned             Boolean      @default(false)
-  isAdmin             Boolean      @default(false)
-  isTester             Boolean      @default(false)
+  isAdmin            Boolean      @default(false)
+  isTester           Boolean      @default(false)
   createdAt          DateTime     @default(now())
   verificationSecret String?
   authenticated      Boolean      @default(false)
@@ -27,6 +27,10 @@ model User {
   tasks              Task[]
   mainthreads        Mainthread[]
   subthreads         Subthread[]
+  posts              Post[]
+  postlikes          PostLike[]
+  postScraps         PostScrap[]
+  postComments       PostComment[]
 }
 
 model Task {
@@ -50,6 +54,7 @@ model CustomRoom {
   usePassword     Boolean
   password        String?
   allowMic        Boolean
+  posts           Post[]
 }
 
 model Class {
@@ -94,11 +99,61 @@ model Notice {
   createdAt DateTime @default(now())
 }
 
+model Post {
+  id            String   @id @default(uuid())
+  category      PostCategory
+  title         String
+  contents      String
+  author        User       @relation(fields: [authorId], references: [id])
+  authorId      String
+  room          CustomRoom @relation(fields: [roomId], references: [id])
+  roomId        String
+  postlikes     PostLike[]
+  postScraps    PostScrap[]
+  postComments  PostComment[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model PostLike {
+  id        String   @id @default(uuid())
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    String
+  user      User       @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime @default(now())
+}
+
+model PostScrap {
+  id        String   @id @default(uuid())
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    String
+  user      User       @relation(fields: [userId], references: [id])
+  userId    String
+  createdAt DateTime @default(now())
+}
+
+model PostComment {
+  id        String   @id @default(uuid())
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    String
+  user      User       @relation(fields: [userId], references: [id])
+  userId    String
+  comment   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 enum FeedbackCategory {
   GENERAL
   BUG
   SUGGESTION
   ENHANCEMENT
+}
+
+enum PostCategory {
+  QUESTION
+  CHAT
 }
 
 enum College {
