@@ -26,7 +26,7 @@ export class PostController {
         return this.postService.getPost(postId);
     }
 
-    @Post("/post/")
+    @Post("/post")
     async createPost(@Body() body) {
         const userId: string = body.userId;
         const roomId: string = body.roomId;
@@ -43,7 +43,7 @@ export class PostController {
         );
     }
 
-    @Post("/postLike/")
+    @Post("/postLike")
     async createPostLike(@Body() body) {
         const userId: string = body.userId;
         const postId: string = body.postId;
@@ -54,7 +54,7 @@ export class PostController {
         );
     }
 
-    @Post("/postScrap/")
+    @Post("/postScrap")
     async createPostScrap(@Body() body) {
         const userId: string = body.userId;
         const postId: string = body.postId;
@@ -65,7 +65,7 @@ export class PostController {
         );
     }
 
-    @Post("/postComment/")
+    @Post("/postComment")
     async createPostComment(@Body() body) {
         const userId: string = body.userId;
         const postId: string = body.postId;
