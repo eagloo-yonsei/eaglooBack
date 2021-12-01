@@ -8,13 +8,14 @@ import { AppService } from "src/service/app.service";
 import { RoomService } from "src/service";
 import { UserService } from "src/service";
 import { FeedbackModule } from "./feedback.module";
+import { PostModule } from "./post.module";
 // NOTE !#SOCKET RoomModule 주석 참고
 // import { RoomModule } from "./room.module";
 import { TaskModule } from "./task.module";
 import { ThreadModule } from "./thread.module";
 
 @Module({
-    imports: [FeedbackModule, TaskModule, ThreadModule],
+    imports: [FeedbackModule, PostModule, TaskModule, ThreadModule],
     controllers: [AppController, RoomController, UserController],
     providers: [
         AppService,
