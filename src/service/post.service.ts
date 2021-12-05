@@ -35,6 +35,7 @@ export class PostService {
                             postComments : {
                                 select : {
                                     userId : true,
+                                    comment : true,
                                 },
                             },
                             createdAt : true,
