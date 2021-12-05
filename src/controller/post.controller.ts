@@ -10,6 +10,7 @@ import {
 import { ApiTags } from "@nestjs/swagger";
 import { PostService } from "src/service";
 import { PostCategory } from ".prisma/client";
+import {anonymization} from "../utils/anonymization";
 
 @ApiTags("포스트보드")
 @Controller("post")
@@ -23,7 +24,9 @@ export class PostController {
 
     @Get("/post/:postId")
     async getPost(@Param("postId") postId: string) {
-        return this.postService.getPost(postId);
+        var data = await this.postService.getPost(postId);
+        data.post.postComments = anonymization(data.post.postComments);
+        return data;
     }
 
     @Post("/post")
@@ -122,3 +125,4 @@ export class PostController {
         return this.postService.deletePostCommentLike(postCommentId);
     }
 }
+
