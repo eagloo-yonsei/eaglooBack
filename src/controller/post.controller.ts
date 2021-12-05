@@ -10,7 +10,7 @@ import {
 import { ApiTags } from "@nestjs/swagger";
 import { PostService } from "src/service";
 import { PostCategory } from ".prisma/client";
-import {anonymization} from "../utils/anonymization";
+import { anonymization } from "../utils/anonymization";
 
 @ApiTags("포스트보드")
 @Controller("post")
@@ -20,8 +20,10 @@ export class PostController {
     @Get("/room/:roomId")
     async getAllPosts(@Param("roomId") roomId: string) {
         var data = await this.postService.getAllPosts(roomId);
-        for (var i=0; i<data.posts.posts.length; i++){
-            data.posts.posts[i].postComments = anonymization(data.posts.posts[i].postComments);
+        for (var i = 0; i < data.posts.posts.length; i++) {
+            data.posts.posts[i].postComments = anonymization(
+                data.posts.posts[i].postComments
+            );
         }
         return data;
     }
@@ -55,10 +57,7 @@ export class PostController {
         const userId: string = body.userId;
         const postId: string = body.postId;
 
-        return this.postService.createPostLike(
-            userId,
-            postId,
-        );
+        return this.postService.createPostLike(userId, postId);
     }
 
     @Post("/postScrap")
@@ -66,10 +65,7 @@ export class PostController {
         const userId: string = body.userId;
         const postId: string = body.postId;
 
-        return this.postService.createPostScrap(
-            userId,
-            postId,
-        );
+        return this.postService.createPostScrap(userId, postId);
     }
 
     @Post("/postComment")
@@ -78,11 +74,7 @@ export class PostController {
         const postId: string = body.postId;
         const comment: string = body.comment;
 
-        return this.postService.createPostComment(
-            userId,
-            postId,
-            comment
-        );
+        return this.postService.createPostComment(userId, postId, comment);
     }
 
     @Put("/post/:postId")
@@ -91,22 +83,15 @@ export class PostController {
         const postTitle: string = body.postTitle;
         const postContents: string = body.postContents;
 
-        return this.postService.updatePost(
-            postId,
-            postTitle,
-            postContents
-        );
+        return this.postService.updatePost(postId, postTitle, postContents);
     }
 
     @Put("/postComment/:postCommentId")
     async updatePostComment(@Body() body) {
-        const postCommentId : string = body.postCommentId;
+        const postCommentId: string = body.postCommentId;
         const comment: string = body.comment;
 
-        return this.postService.updatePostComment(
-            postCommentId,
-            comment,
-        );
+        return this.postService.updatePostComment(postCommentId, comment);
     }
 
     @Delete("/post/:postId")
@@ -129,4 +114,3 @@ export class PostController {
         return this.postService.deletePostCommentLike(postCommentId);
     }
 }
-

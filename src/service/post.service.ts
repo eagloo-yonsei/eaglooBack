@@ -24,17 +24,20 @@ export class PostService {
                             roomId: true,
                             postlikes: {
                                 select: {
+                                    id: true,
                                     userId: true,
                                 },
                             },
                             postScraps: {
                                 select: {
+                                    id: true,
                                     userId: true,
                                 },
                             },
                             postComments: {
                                 select: {
                                     id: true,
+                                    postId: true,
                                     userId: true,
                                     comment: true,
                                     createdAt: true,
@@ -159,8 +162,16 @@ export class PostService {
         try {
             await prisma.postLike.create({
                 data: {
-                    userId,
-                    postId,
+                    user: {
+                        connect: {
+                            id: userId,
+                        },
+                    },
+                    post: {
+                        connect: {
+                            id: postId,
+                        },
+                    },
                 },
             });
 
@@ -174,8 +185,16 @@ export class PostService {
         try {
             await prisma.postScrap.create({
                 data: {
-                    userId,
-                    postId,
+                    user: {
+                        connect: {
+                            id: userId,
+                        },
+                    },
+                    post: {
+                        connect: {
+                            id: postId,
+                        },
+                    },
                 },
             });
 
