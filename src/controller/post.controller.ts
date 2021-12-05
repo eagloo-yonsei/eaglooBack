@@ -19,8 +19,10 @@ export class PostController {
 
     @Get("/room/:roomId")
     async getAllPosts(@Param("roomId") roomId: string) {
-        var data = await this.postService.getPost(roomId);
-        data.post.postComments = anonymization(data.post.postComments);
+        var data = await this.postService.getAllPosts(roomId);
+        for (var i=0; i<data.posts.posts.length; i++){
+            data.posts.posts[i].postComments = anonymization(data.posts.posts[i].postComments);
+        }
         return data;
     }
 
