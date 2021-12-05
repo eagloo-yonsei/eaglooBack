@@ -9,43 +9,43 @@ export class PostService {
 
     async getAllPosts(roomId: string) {
         try {
-            const allPosts = await prisma.customRoom.findUnique({
+            const posts = await prisma.customRoom.findUnique({
                 where: {
-                    id : roomId,
+                    id: roomId,
                 },
                 select: {
-                    posts : {
-                        select : {
+                    posts: {
+                        select: {
                             id: true,
                             category: true,
                             title: true,
                             contents: true,
-                            authorId : true,
-                            roomId : true,
-                            postlikes : {
-                                select : {
-                                    userId : true,
+                            authorId: true,
+                            roomId: true,
+                            postlikes: {
+                                select: {
+                                    userId: true,
                                 },
                             },
-                            postScraps : {
-                                select : {
-                                    userId : true,
+                            postScraps: {
+                                select: {
+                                    userId: true,
                                 },
                             },
-                            postComments : {
-                                select : {
-                                    userId : true,
+                            postComments: {
+                                select: {
+                                    userId: true,
                                 },
                             },
-                            createdAt : true,
-                            updatedAt : true,
+                            createdAt: true,
+                            updatedAt: true,
                         },
                     },
                 },
             });
             return {
+                posts,
                 success: true,
-                posts: allPosts,
             };
         } catch (error) {
             console.error(error);
@@ -60,38 +60,38 @@ export class PostService {
         try {
             const post = await prisma.post.findUnique({
                 where: {
-                    id : postId,
+                    id: postId,
                 },
                 select: {
                     id: true,
                     category: true,
                     title: true,
                     contents: true,
-                    authorId : true,
-                    roomId : true,
-                    postlikes : {
-                        select : {
-                            id : true,
-                            userId : true,
+                    authorId: true,
+                    roomId: true,
+                    postlikes: {
+                        select: {
+                            id: true,
+                            userId: true,
                         },
                     },
-                    postScraps : {
-                        select : {
-                            id : true,
-                            userId : true,
+                    postScraps: {
+                        select: {
+                            id: true,
+                            userId: true,
                         },
                     },
-                    postComments : {
-                        select : {
-                            id : true,
-                            userId : true,
-                            comment : true,
-                            createdAt : true,
-                            updatedAt : true,
+                    postComments: {
+                        select: {
+                            id: true,
+                            userId: true,
+                            comment: true,
+                            createdAt: true,
+                            updatedAt: true,
                         },
                     },
-                    createdAt : true,
-                    updatedAt : true,
+                    createdAt: true,
+                    updatedAt: true,
                 },
             });
             return {
@@ -115,31 +115,48 @@ export class PostService {
         category: PostCategory
     ) {
         try {
-            await prisma.post.create({
+            const newPost = await prisma.post.create({
                 data: {
                     title: postTitle,
                     contents: postContents,
-                    authorId: userId,
-                    roomId,
+                    author: {
+                        connect: {
+                            id: userId,
+                        },
+                    },
+                    room: {
+                        connect: {
+                            id: roomId,
+                        },
+                    },
                     category,
+                },
+                select: {
+                    id: true,
+                    category: true,
+                    title: true,
+                    contents: true,
+                    authorId: true,
+                    roomId: true,
+                    postlikes: true,
+                    postScraps: true,
+                    postComments: true,
                 },
             });
 
-            return { success: true };
+            return { newPost, success: true };
         } catch (error) {
+            console.error(error);
             return { success: false, message: "포스트 생성에 실패했습니다." };
         }
     }
 
-    async createPostLike(
-        userId: string,
-        postId: string,
-    ) {
+    async createPostLike(userId: string, postId: string) {
         try {
             await prisma.postLike.create({
                 data: {
                     userId,
-                    postId
+                    postId,
                 },
             });
 
@@ -149,35 +166,12 @@ export class PostService {
         }
     }
 
-    async createPostScrap(
-        userId: string,
-        postId: string,
-    ) {
+    async createPostScrap(userId: string, postId: string) {
         try {
             await prisma.postScrap.create({
                 data: {
                     userId,
-                    postId
-                },
-            });
-
-            return { success: true };
-        } catch (error) {
-            return { success: false, message: "포스트 생성에 실패했습니다." };
-        }
-    }
-
-    async createPostComment(
-        userId: string,
-        postId: string,
-        comment : string,
-    ) {
-        try {
-            await prisma.postComment.create({
-                data: {
-                    userId,
                     postId,
-                    comment
                 },
             });
 
@@ -187,19 +181,45 @@ export class PostService {
         }
     }
 
-    async updatePost(
-        postId : string,
-        postTitle: string,
-        postContents: string
-    ) {
+    async createPostComment(userId: string, postId: string, comment: string) {
+        try {
+            const newPostComment = await prisma.postComment.create({
+                data: {
+                    user: {
+                        connect: {
+                            id: userId,
+                        },
+                    },
+                    post: {
+                        connect: {
+                            id: postId,
+                        },
+                    },
+                    comment,
+                },
+                select: {
+                    id: true,
+                    postId: true,
+                    userId: true,
+                    comment: true,
+                },
+            });
+
+            return { newPostComment, success: true };
+        } catch (error) {
+            return { success: false, message: "포스트 생성에 실패했습니다." };
+        }
+    }
+
+    async updatePost(postId: string, postTitle: string, postContents: string) {
         try {
             await prisma.post.update({
                 where: {
                     id: postId,
                 },
                 data: {
-                    title : postTitle,
-                    contents : postContents,
+                    title: postTitle,
+                    contents: postContents,
                 },
             });
 
@@ -213,10 +233,7 @@ export class PostService {
         }
     }
 
-    async updatePostComment(
-        postCommentId : string,
-        comment : string,
-    ) {
+    async updatePostComment(postCommentId: string, comment: string) {
         try {
             await prisma.postComment.update({
                 where: {
