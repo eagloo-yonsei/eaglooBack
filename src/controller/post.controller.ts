@@ -19,7 +19,9 @@ export class PostController {
 
     @Get("/room/:roomId")
     async getAllPosts(@Param("roomId") roomId: string) {
-        return this.postService.getAllPosts(roomId);
+        var data = await this.postService.getPost(roomId);
+        data.post.postComments = anonymization(data.post.postComments);
+        return data;
     }
 
     @Get("/post/:postId")
