@@ -106,8 +106,9 @@ model Post {
   contents      String
   author        User       @relation(fields: [authorId], references: [id])
   authorId      String
-  room          CustomRoom @relation(fields: [roomId], references: [id])
-  roomId        String
+  room          CustomRoom? @relation(fields: [roomId], references: [id])
+  roomId        String?
+  roomPublicId  Int?
   postlikes     PostLike[]
   postScraps    PostScrap[]
   postComments  PostComment[]

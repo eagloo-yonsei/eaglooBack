@@ -63,6 +63,58 @@ export class PostService {
         }
     }
 
+    async getAllPostsPublic(roomPublicId: number) {
+        try {
+            const posts = await prisma.post.findMany({
+                where: {
+                    roomPublicId: Number(roomPublicId),
+                },
+                select: {
+                    id: true,
+                    category: true,
+                    title: true,
+                    contents: true,
+                    authorId: true,
+                    roomId: true,
+                    postlikes: {
+                        select: {
+                            id: true,
+                            userId: true,
+                        },
+                    },
+                    postScraps: {
+                        select: {
+                            id: true,
+                            userId: true,
+                        },
+                    },
+                    postComments: {
+                        select: {
+                            id: true,
+                            postId: true,
+                            userId: true,
+                            comment: true,
+                            createdAt: true,
+                            updatedAt: true,
+                        },
+                    },
+                    createdAt: true,
+                    updatedAt: true,
+                },
+            });
+            return {
+                posts : posts,
+                success: true,
+            };
+        } catch (error) {
+            console.error(error);
+            return {
+                success: false,
+                message: "서버 오류입니다. 잠시 후 다시 시도해 주세요",
+            };
+        }
+    }
+
     async getPost(postId: string) {
         try {
             const post = await prisma.post.findUnique({
@@ -157,6 +209,47 @@ export class PostService {
             return { success: false, message: "포스트 생성에 실패했습니다." };
         }
     }
+
+    async createPostPublic(
+        userId: string,
+        roomPublicId: number,
+        postTitle: string,
+        postContents: string,
+        category: PostCategory
+    ) {
+        try {
+            const newPost = await prisma.post.create({
+                data: {
+                    title: postTitle,
+                    contents: postContents,
+                    author: {
+                        connect: {
+                            id: userId,
+                        },
+                    },
+                    roomPublicId,
+                    category,
+                },
+                select: {
+                    id: true,
+                    category: true,
+                    title: true,
+                    contents: true,
+                    authorId: true,
+                    roomPublicId: true,
+                    postlikes: true,
+                    postScraps: true,
+                    postComments: true,
+                },
+            });
+
+            return { newPost, success: true };
+        } catch (error) {
+            console.error(error);
+            return { success: false, message: "포스트 생성에 실패했습니다." };
+        }
+    }
+
 
     async createPostLike(userId: string, postId: string) {
         try {

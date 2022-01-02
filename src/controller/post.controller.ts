@@ -28,6 +28,17 @@ export class PostController {
         return data;
     }
 
+    @Get("/roomPublic/:roomPublicId")
+    async getAllPostsPublic(@Param("roomPublicId") roomPublicId: number) {
+        var data = await this.postService.getAllPostsPublic(roomPublicId);
+        for (var i = 0; i < data.posts.length; i++) {
+            data.posts[i].postComments = anonymization(
+                data.posts[i].postComments
+            );
+        }
+        return data;
+    }
+
     @Get("/post/:postId")
     async getPost(@Param("postId") postId: string) {
         var data = await this.postService.getPost(postId);
@@ -46,6 +57,23 @@ export class PostController {
         return this.postService.createPost(
             userId,
             roomId,
+            postTitle,
+            postContents,
+            category
+        );
+    }
+
+    @Post("/postPublic")
+    async createPostPublic(@Body() body) {
+        const userId: string = body.userId;
+        const roomPublicId: number = body.roomId;
+        const postTitle: string = body.postTitle;
+        const postContents: string = body.postContents;
+        const category: PostCategory = body.category;
+
+        return this.postService.createPostPublic(
+            userId,
+            roomPublicId,
             postTitle,
             postContents,
             category
