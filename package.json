@@ -15,6 +15,7 @@
         "@nestjs/platform-socket.io": "^7.6.13",
         "@nestjs/swagger": "^4.8.2",
         "@nestjs/websockets": "^7.6.13",
+        "@paljs/plugins": "^4.0.13",
         "@prisma/client": "^2.26.0",
         "dotenv": "^8.2.0",
         "googleapis": "^68.0.0",

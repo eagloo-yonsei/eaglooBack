@@ -22,14 +22,23 @@ model User {
   verificationSecret String?
   authenticated      Boolean      @default(false)
   customLinks        Json[]
+  /// @onDelete(CASCADE)
   owningRooms        CustomRoom[] @relation(name: "ownership")
+  /// @onDelete(CASCADE)
   blockedRooms       CustomRoom[] @relation(name: "block")
+  /// @onDelete(CASCADE)
   tasks              Task[]
+  /// @onDelete(CASCADE)
   mainthreads        Mainthread[]
+  /// @onDelete(CASCADE)
   subthreads         Subthread[]
+  /// @onDelete(CASCADE)
   posts              Post[]
+  /// @onDelete(CASCADE)
   postlikes          PostLike[]
+  /// @onDelete(CASCADE)
   postScraps         PostScrap[]
+  /// @onDelete(CASCADE)
   postComments       PostComment[]
 }
 
@@ -49,11 +58,13 @@ model CustomRoom {
   roomDescription String?
   ownerId         String
   owner           User    @relation(name: "ownership", fields: [ownerId], references: [id])
+  /// @onDelete(CASCADE)
   blockingUsers   User[]  @relation(name: "block", references: [id])
   openToPublic    Boolean
   usePassword     Boolean
   password        String?
   allowMic        Boolean
+  /// @onDelete(CASCADE)
   posts           Post[]
 }
 
@@ -71,6 +82,7 @@ model Mainthread {
   college    College
   subject    String
   user       User        @relation(fields: [userId], references: [id])
+  /// @onDelete(CASCADE)
   subthreads Subthread[]
 }
 
@@ -88,6 +100,7 @@ model Feedback {
   id        String           @id @default(uuid())
   user      String
   content   String
+  /// @onDelete(CASCADE)
   comments  String[]
   createdAt DateTime         @default(now())
   category  FeedbackCategory
@@ -109,8 +122,11 @@ model Post {
   room          CustomRoom? @relation(fields: [roomId], references: [id])
   roomId        String?
   roomPublicId  Int?
+  /// @onDelete(CASCADE)
   postlikes     PostLike[]
+  /// @onDelete(CASCADE)
   postScraps    PostScrap[]
+  /// @onDelete(CASCADE)
   postComments  PostComment[]
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
