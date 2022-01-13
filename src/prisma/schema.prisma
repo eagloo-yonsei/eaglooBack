@@ -2,6 +2,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["referentialActions"]
 }
 
 datasource db {
@@ -22,23 +23,14 @@ model User {
   verificationSecret String?
   authenticated      Boolean      @default(false)
   customLinks        Json[]
-  /// @onDelete(CASCADE)
   owningRooms        CustomRoom[] @relation(name: "ownership")
-  /// @onDelete(CASCADE)
   blockedRooms       CustomRoom[] @relation(name: "block")
-  /// @onDelete(CASCADE)
   tasks              Task[]
-  /// @onDelete(CASCADE)
   mainthreads        Mainthread[]
-  /// @onDelete(CASCADE)
   subthreads         Subthread[]
-  /// @onDelete(CASCADE)
   posts              Post[]
-  /// @onDelete(CASCADE)
   postlikes          PostLike[]
-  /// @onDelete(CASCADE)
   postScraps         PostScrap[]
-  /// @onDelete(CASCADE)
   postComments       PostComment[]
 }
 
@@ -49,7 +41,7 @@ model Task {
   createdAt  DateTime @default(now())
   done       Boolean  @default(false)
   importance Int      @default(1)
-  user       User     @relation(fields: [userId], references: [id])
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model CustomRoom {
@@ -57,14 +49,12 @@ model CustomRoom {
   roomName        String  @unique
   roomDescription String?
   ownerId         String
-  owner           User    @relation(name: "ownership", fields: [ownerId], references: [id])
-  /// @onDelete(CASCADE)
+  owner           User    @relation(name: "ownership", fields: [ownerId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   blockingUsers   User[]  @relation(name: "block", references: [id])
   openToPublic    Boolean
   usePassword     Boolean
   password        String?
   allowMic        Boolean
-  /// @onDelete(CASCADE)
   posts           Post[]
 }
 
@@ -81,7 +71,7 @@ model Mainthread {
   createdAt  DateTime    @default(now())
   college    College
   subject    String
-  user       User        @relation(fields: [userId], references: [id])
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   /// @onDelete(CASCADE)
   subthreads Subthread[]
 }
@@ -92,8 +82,8 @@ model Subthread {
   content      String
   createdAt    DateTime   @default(now())
   mainthreadId String
-  mainthread   Mainthread @relation(fields: [mainthreadId], references: [id])
-  user         User       @relation(fields: [userId], references: [id])
+  mainthread   Mainthread @relation(fields: [mainthreadId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model Feedback {
@@ -117,16 +107,13 @@ model Post {
   category      PostCategory
   title         String
   contents      String
-  author        User       @relation(fields: [authorId], references: [id])
+  author        User       @relation(fields: [authorId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   authorId      String
-  room          CustomRoom? @relation(fields: [roomId], references: [id])
+  room          CustomRoom? @relation(fields: [roomId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   roomId        String?
   roomPublicId  Int?
-  /// @onDelete(CASCADE)
   postlikes     PostLike[]
-  /// @onDelete(CASCADE)
   postScraps    PostScrap[]
-  /// @onDelete(CASCADE)
   postComments  PostComment[]
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
@@ -134,27 +121,27 @@ model Post {
 
 model PostLike {
   id        String   @id @default(uuid())
-  post      Post     @relation(fields: [postId], references: [id])
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   postId    String
-  user      User       @relation(fields: [userId], references: [id])
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   userId    String
   createdAt DateTime @default(now())
 }
 
 model PostScrap {
   id        String   @id @default(uuid())
-  post      Post     @relation(fields: [postId], references: [id])
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   postId    String
-  user      User       @relation(fields: [userId], references: [id])
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   userId    String
   createdAt DateTime @default(now())
 }
 
 model PostComment {
   id        String   @id @default(uuid())
-  post      Post     @relation(fields: [postId], references: [id])
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   postId    String
-  user      User       @relation(fields: [userId], references: [id])
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   userId    String
   comment   String
   createdAt DateTime @default(now())
