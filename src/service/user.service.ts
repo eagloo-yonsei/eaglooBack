@@ -182,7 +182,7 @@ export class UserService {
       if (await sendMail(email, secret)) {
         return {
           success: true,
-          message: `인증 메일이 ${email}@yonsei.ac.kr 로 발송되었습니다`,
+          message: `인증 메일이 ${email}@yonsei.ac.kr 로 발송되었습니다. 스팸 메일함도 확인해 주세요`,
         };
       } else {
         return {
@@ -392,7 +392,7 @@ export class UserService {
       if (await sendResetMail(email, secret)) {
         return {
           success: true,
-          message: "메일이 전송되었습니다",
+          message: "메일이 전송되었습니다. 스팸메일함도 확인해 주세요",
         };
       } else {
         return {
